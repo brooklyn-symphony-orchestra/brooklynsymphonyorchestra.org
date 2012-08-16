@@ -8,3 +8,42 @@ Template:       responsive
 */
 
 @import url("../responsive/style.css");
+
+p {
+	margin:0 0 1.6em 0;
+}
+.menu {
+    float:right;
+    margin:-55px 0 0 0;
+    background-color: transparent;
+	background-image:-webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+	background-image:-webkit-linear-gradient(top, transparent, transparent);
+	background-image:-moz-linear-gradient(top, transparent, transparent);
+	background-image:-ms-linear-gradient(top, transparent, transparent);
+	background-image:-o-linear-gradient(top, transparent, transparent);
+	background-image:linear-gradient(top, transparent, transparent);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=transparent, endColorstr=transparent);    
+}
+.menu li {
+	text-transform: uppercase;
+}
+.menu .current_page_item a, .menu .current-menu-item a {
+	background-color:transparent;
+	color: red;
+}
+.menu a {
+	border-left:transparent;
+	text-shadow: none;
+	color: black;
+}
+.menu a:hover {
+	background-color:transparent;
+	background-image:-webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+	background-image:-webkit-linear-gradient(top, transparent, transparent);
+	background-image:-moz-linear-gradient(top, transparent, transparent);
+	background-image:-ms-linear-gradient(top, transparent, transparent);
+	background-image:-o-linear-gradient(top, transparent, transparent);
+	background-image:linear-gradient(top, transparent, transparent);
+	color:red;
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=transparent, endColorstr=transparent);
+}

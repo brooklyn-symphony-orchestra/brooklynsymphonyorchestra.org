@@ -32,7 +32,7 @@ if ( !defined('ABSPATH')) exit;
         <?php endif; ?> 
           
             <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                <h1><?php the_title(); ?></h1>
+                <h1 class="post-title"><?php the_title(); ?></h1>
 
                 <div class="post-meta">
                 <?php 
@@ -72,6 +72,11 @@ if ( !defined('ABSPATH')) exit;
                     
                     <?php wp_link_pages(array('before' => '<div class="pagination">' . __('Pages:', 'responsive'), 'after' => '</div>')); ?>
                 </div><!-- end of .post-entry -->
+                
+                <div class="navigation">
+			        <div class="previous"><?php previous_post_link( '&#8249; %link' ); ?></div>
+                    <div class="next"><?php next_post_link( '%link &#8250;' ); ?></div>
+		        </div><!-- end of .navigation -->
                 
                 <div class="post-data">
 				    <?php the_tags(__('Tagged with:', 'responsive') . ' ', ', ', '<br />'); ?> 

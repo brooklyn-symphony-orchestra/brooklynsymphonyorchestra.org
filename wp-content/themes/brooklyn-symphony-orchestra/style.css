@@ -1,0 +1,17 @@
+/*
+Theme Name:     Brooklyn Symphony Orchestra
+Description:    
+Author:         Alex
+Template:       wordpress-bootstrap
+
+(optional values you can add: Theme URI, Author URI, Version)
+*/
+
+@import url("../wordpress-bootstrap/style.css");
+
+.hero-unit h1 {
+	text-transform: uppercase;
+}
+p {
+	color: #ff0404;
+}

@@ -23,7 +23,7 @@ add_action('admin_init', 'responsive_theme_options_init');
 add_action('admin_menu', 'responsive_theme_options_add_page');
 
 /**
- * A safe way of adding javascripts to a WordPress generated page.
+ * A safe way of adding JavaScripts to a WordPress generated page.
  */
 function responsive_admin_enqueue_scripts( $hook_suffix ) {
 	wp_enqueue_style('responsive-theme-options', get_template_directory_uri() . '/includes/theme-options.css', false, '1.0');
@@ -121,6 +121,8 @@ function responsive_theme_options_do_page() {
 		<?php if (false !== $_REQUEST['settings-updated']) : ?>
 		<div class="updated fade"><p><strong><?php _e('Options Saved', 'responsive'); ?></strong></p></div>
 		<?php endif; ?>
+        
+            <?php responsive_theme_options(); // Theme Options Hook ?>
 
         <form method="post" action="options.php">
             <?php settings_fields('responsive_options'); ?>

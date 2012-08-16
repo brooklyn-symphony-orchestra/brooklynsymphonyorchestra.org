@@ -1,9 +1,9 @@
 /* 
 Theme Name: Responsive 
 Theme URI: http://themeid.com/responsive-theme/ 
-Description: Responsive WordPress Theme that features 9 page Templates such as Blog, Blog Summary and Template based layout designs: sidebar/content, sidebar/content half, content/sidebar and content/sidebar half. There is also full width page, sitemap Template as well as landing page for your PPC or any other purposes. Responsive also supports 9 widget areas and best of all this Theme is crafted with fluid proportion-based grid system of our own to adapt the design to the viewing environment. There are also Theme Options to control the content, webmaster tools, logo managament, social icons and 4 navigation menus. Currently translated in 18 languages: German, French, Portuguese, Italian, Swedish, Malay, Catalan, Spanish, Bulgarian, Norwegian, Croatian, Serbian, Persian, Polish, Slovenian, Russian, Danish and Lithuanian language. Everything is backed by our FREE dedicated support forums @ http://themeid.com/support
+Description: Responsive Theme is a flexible foundation with fluid grid system that adapts your website to mobile devices and the desktop or any other viewing environment. Theme featured 9 Page Templates, 9 Widget Areas, 6 Template Layouts, 4 Menu Positions and more. Powerful but simple Theme Options for full CMS control. Easy Logo Upload, Social Networking and Webmaster Tools. Responsive is WooCommerce Compatible, Multilingual Ready (WPML) and currently translated into 24 languages. No memberships or clubs to get a FREE/Responsive Support you need. http://themeid.com/support
 
-Version: 1.6.9
+Version: 1.7.4
 Author: ThemeID 
 Author URI: http://themeid.com
 Tags: white, black, gray, light, custom-menu, custom-header, custom-background, one-column, two-columns, left-sidebar, right-sidebar, flexible-width, theme-options, threaded-comments, full-width-template, sticky-post, translation-ready
@@ -110,20 +110,24 @@ p {
     word-wrap:break-word;
 }
 
-cite, em, dfn {
+i,
+em,
+dfn,
+cite {
 	font-style:italic;
 }
 
-code, 
-kbd, 
-samp, 
-pre, 
-tt, 
-var {
+tt,
+var,
+pre,
+kbd,
+samp,
+code {
 	font-family:Consolas, "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
 	font-style:normal;
 }
 
+b,
 strong {
 	font-weight:700;
 }
@@ -146,9 +150,9 @@ dfn {
 	border-bottom:1px solid #ccc;
 }
 
-small, 
 sup, 
-sub {
+sub,
+small {
 	font-size:85%;
 }
 
@@ -164,9 +168,9 @@ a acronym {
 	border:none;
 }
 
+dfn[title],
 abbr[title], 
-acronym[title], 
-dfn[title] {
+acronym[title] {
 	border-bottom:1px solid #ccc;
 	cursor:help;
 }
@@ -258,7 +262,7 @@ sub {
 }
 
 /* .fit is the very last item in your grid 
-   to keep your columns inline
+   to keep your columns inline without float
 */
 .fit {
 	margin-left:0!important;
@@ -267,6 +271,12 @@ sub {
 
 img {
 	height:auto;
+	max-width:100%;
+}
+
+embed,
+iframe,
+object {
 	max-width:100%;
 }
 
@@ -283,22 +293,27 @@ a:hover {
 	text-decoration:none;
 }
 
+::selection {
+	background:#cdd0d4;
+	text-shadow:none;
+}
+
 /* =Forms
 -------------------------------------------------------------- */
-fieldset {
-	border:1px solid #ccc;
-	margin:0 0 1.5em;
-	padding:1em 2em;
+label {
+	display:block;
+	font-weight:700;
+	padding:2px 0;
 }
 
 legend {
 	padding:2px 5px;
 }
 
-label {
-	display:block;
-	font-weight:700;
-	padding:2px 0;
+fieldset {
+	border:1px solid #ccc;
+	margin:0 0 1.5em;
+	padding:1em 2em;
 }
 
 form div {
@@ -370,10 +385,10 @@ input[type='password'] {
 /* =Buttons
 -------------------------------------------------------------- */
 button, 
-a.button, 
+a.button,
+input[type='reset'], 
 input[type='button'], 
-input[type='submit'], 
-input[type='reset'] {
+input[type='submit'] {
 	-moz-border-radius:2px;
 	-webkit-border-radius:2px;
 	background-color:#eaeaea;
@@ -402,10 +417,10 @@ input[type='reset'] {
 }
 
 button:hover, 
-a.button:hover, 
+a.button:hover,
+input[type='reset']:hover, 
 input[type='button']:hover, 
-input[type='submit']:hover, 
-input[type='reset']:hover {
+input[type='submit']:hover {
 	background-color:#eaeaea;
 	background-image:-webkit-gradient(linear, left top, left bottom, from(#eaeaea), to(#eaeaea));
 	background-image:-webkit-linear-gradient(top, #eaeaea, #eaeaea);
@@ -805,7 +820,7 @@ a.black:hover {
 	-webkit-border-radius:4px;
 	border-radius:4px;
 	display:block;
-	margin:0 0 20px 0;
+	margin:20px 0;
 	padding:15px;
 	text-align:left;
 }
@@ -816,9 +831,9 @@ a.black:hover {
 	color:#212121;
 }
 
-.success {
-	background-color:#f9fde8;
-	border:1px solid #a2bc13;
+.address {
+	background-color:#f6f5ef;
+	border:1px solid #cdc9a5;
 	color:#212121;
 }
 
@@ -828,9 +843,9 @@ a.black:hover {
 	color:#212121;
 }
 
-.information {
-	background-color:#eef3f6;
-	border:1px solid #6ca6cd;
+.success {
+	background-color:#f9fde8;
+	border:1px solid #a2bc13;
 	color:#212121;
 }
 
@@ -840,12 +855,18 @@ a.black:hover {
 	color:#212121;
 }
 
-.address {
-	background-color:#f6f5ef;
-	border:1px solid #cdc9a5;
+.information {
+	background-color:#eef3f6;
+	border:1px solid #6ca6cd;
 	color:#212121;
 }
 
+.required {
+	color:#d5243f;
+}
+
+/* =IE6 Notice
+-------------------------------------------------------------- */
 .msie-box {
 	background-color:#f9edbe;
 	border:1px solid #f0c36d;
@@ -864,21 +885,17 @@ a.black:hover {
 	color:#212121;
 }
 
-.required {
-	color:#d5243f;
-}
-
 /* =Tables
 -------------------------------------------------------------- */
+th, 
+td,
 table {
-	border-left:1px solid #ccc;
-	border-top:1px solid #ccc;
-	width:100%;
+	border:1px solid #ddd;
 }
 
-th, td {
-	border-bottom:1px solid #ddd;
-	border-right:1px solid #ccc;
+table {
+	border-collapse:collapse;
+	width:100%;
 }
 
 /* =Lists
@@ -960,10 +977,6 @@ h6 {
 
 /* =Margins & Paddings
 -------------------------------------------------------------- */
-blockquote:first-child {
-	margin:.8em 0;
-}
-
 p, 
 hr, 
 dl, 
@@ -1011,6 +1024,10 @@ blockquote {
 	padding:0 1em;
 }
 
+blockquote:first-child {
+	margin:.8em 0;
+}
+
 fieldset {
 	margin:1.6em 0;
 	padding:0 1em 1em;
@@ -1036,10 +1053,6 @@ select {
 
 option {
 	padding:0 .4em;
-}
-
-a {
-	position:relative;
 }
 
 dt {
@@ -1088,7 +1101,7 @@ form div {
 	background-color:transparent;
 	border:none;
 	margin: 20px auto 20px auto;
-	padding:0
+	padding:0;
 }
 
 #header {
@@ -1136,7 +1149,7 @@ form div {
 	margin-bottom:20px;
 }
 
-#content-archive {
+#content-full {
 	margin-bottom:20px;
 }
 
@@ -1148,7 +1161,7 @@ form div {
 	margin-bottom:20px;
 }
 
-#content-full {
+#content-archive {
 	margin-bottom:20px;
 }
 
@@ -1165,9 +1178,6 @@ form div {
 }
 
 #content .sticky p {
-}
-
-#content .bypostauthor {
 }
 
 /* =Templates
@@ -1591,17 +1601,18 @@ form div {
 	background-color:#343434;
 }
 
+.home .menu .current_page_item a {
+	background-color:transparent;
+}
+
 .menu li li {
 	background:#fff;
 	background-image:none;
 	border:1px solid #b2b2b2;
+	border-top:none;
 	color:#444;
 	filter:none;
 	width:auto;
-}
-
-.menu li li li {
-	margin-top:-1px;
 }
 
 .menu li li a {
@@ -1853,9 +1864,9 @@ form div {
 /* =Navigation
 -------------------------------------------------------------- */
 .navigation {
-	color:#333;
+	color:#111;
 	display:block;
-	font-size:14px;
+	font-size:13px;
 	height:28px;
 	line-height:28px;
 	margin:20px 0;
@@ -1863,12 +1874,12 @@ form div {
 }
 
 .navigation a {
-	color:#333;
+	color:#aaa;
 	padding:4px 10px;
 }
 
 .navigation a:hover {
-	color:#000;
+	color:#111;
 	text-decoration:none;
 }
 
@@ -1929,20 +1940,9 @@ form div {
 	background-color:#fff;
 	border-radius:4px;
 	margin:0;
-	padding:1em;
 }
 
-.commentlist li p {
-	font-size:14px;
-}
-
-.commentlist p {
-	margin:0;
-}
-
-.reply {
-	margin:10px 0;
-}
+.commentlist .bypostauthor {}
 
 .commentlist li cite {
 	color:#111;
@@ -1957,7 +1957,8 @@ form div {
 
 .commentlist .children {
 	list-style:none;
-	margin:0;
+	margin-left:10px;
+	padding:10px;
 }
 
 .commentlist .avatar {
@@ -1968,11 +1969,6 @@ form div {
 	margin-right:10px;
 	padding:0;
 	vertical-align:middle;
-}
-
-.commentlist .children .avatar {
-	height:33px;
-	width:33px;
 }
 
 .comment-author .fn {
@@ -1996,11 +1992,11 @@ form div {
 
 .comment-body {
 	clear:both;
+	padding:10px;
 }
 
 .comment-body p {
 	clear:both;
-	padding-top:10px;
 }
 
 .comment-body .reply {
@@ -2035,11 +2031,16 @@ form div {
 	border-bottom-color:#aaa;
 	border-radius:2px;
 	clear:both;
+	margin-top:15px;
 	padding:10px 20px 50px;
 }
 
 #respond label {
 	display:inline;
+}
+
+.reply {
+	margin:10px 0;
 }
 
 .comment-form-url input,  
@@ -2198,10 +2199,47 @@ img.wp-post-image,
 img.attachment-full,
 img.attachment-large, 
 img.attachment-medium, 
-img.attachment-thumbnail,{
+img.attachment-thumbnail {
 	display:block;
 	margin:15px auto;
 	width:auto;
+}
+
+/* =WooCommerce
+-------------------------------------------------------------- */
+#breadcrumb {
+	padding:40px 0 0 0;
+}
+
+#breadcrumb a {
+	color:#06c;
+	font-size:12px;
+	font-weight:400;
+}
+
+#breadcrumb a:hover {
+	color:#444;
+	text-decoration:none;
+}
+
+#content-woocommerce {
+	margin-bottom:20px;
+}
+
+.products ul, ul.products {
+	margin-top:40px;
+}
+
+.cart-collaterals .shipping_calculator {
+	width:100%;
+}
+
+table.shop_table {
+}
+
+table.cart td.actions .coupon .input-text, 
+table.cart td.actions .coupon .input-text {
+	cursor:text;
 }
 
 /* =Footer
@@ -2361,7 +2399,7 @@ BDO[DIR="rtl"] {
 
     body {
     }
-
+	
     .grid, 
 	.grid-right {
 	    float:none;
@@ -2370,6 +2408,10 @@ BDO[DIR="rtl"] {
 	#featured-image .fluid-width-video-wrapper {
 	    margin:20px 0 0 0;
     }
+	
+	.home #widgets {
+		margin-top:40px;
+	}
 }
 
 @media screen and (max-width: 650px) {
@@ -2392,7 +2434,7 @@ BDO[DIR="rtl"] {
     }
 	
     .js .menu,
-	.sub-header-menu {
+	.js .sub-header-menu {
 		display:none;
 	}
 	
@@ -2440,6 +2482,10 @@ BDO[DIR="rtl"] {
 
     body {
     }
+	
+    table, thead, tbody, th, td, tr { 
+	    display:block; 
+	}
 
     #logo {
 	    float:none;

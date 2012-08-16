@@ -111,4 +111,32 @@ function responsive_widgets_end() {
     do_action('responsive_widgets_end');
 }
 
+/**
+ * Theme Options
+ *
+ * @see theme-options.php
+ */
+function responsive_theme_options() {
+    do_action('responsive_theme_options');
+}
+
+/**
+ * WooCommerce
+ *
+ * Unhook/Hook the WooCommerce Wrappers
+ */
+remove_action('woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10);
+remove_action('woocommerce_after_main_content', 'woocommerce_output_content_wrapper_end', 10);
+
+add_action('woocommerce_before_main_content', 'responsive_woocommerce_wrapper', 10);
+add_action('woocommerce_after_main_content', 'responsive_woocommerce_wrapper_end', 10);
+ 
+function responsive_woocommerce_wrapper() {
+  echo '<div id="content-woocommerce" class="grid col-620">';
+}
+ 
+function responsive_woocommerce_wrapper_end() {
+  echo '</div><!-- end of #content-woocommerce -->';
+}
+
 ?>

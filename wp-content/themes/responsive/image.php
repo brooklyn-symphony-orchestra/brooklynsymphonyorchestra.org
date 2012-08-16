@@ -27,7 +27,7 @@ if ( !defined('ABSPATH')) exit;
 		<?php while (have_posts()) : the_post(); ?>
           
             <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-                <h1><?php the_title(); ?></h1>
+                <h1 class="post-title"><?php the_title(); ?></h1>
                 <p><?php _e('&#8249; Return to', 'responsive'); ?> <a href="<?php echo get_permalink($post->post_parent); ?>" rel="gallery"><?php echo get_the_title($post->post_parent); ?></a></p>
 
                 <div class="post-meta">
