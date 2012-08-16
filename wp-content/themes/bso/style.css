@@ -11,6 +11,7 @@ Template:       responsive
 
 p {
 	margin:0 0 1.6em 0;
+	color: #ff0000;
 }
 .menu {
     float:right;
