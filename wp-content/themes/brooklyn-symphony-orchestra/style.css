@@ -9,9 +9,14 @@ Template:       wordpress-bootstrap
 
 @import url("../wordpress-bootstrap/style.css");
 
+.page-template-page-homepage-php .hero-unit, .blog .hero-unit {
+	padding: 30px;
+	font-size: 14px;
+}
 .hero-unit h1 {
 	text-transform: uppercase;
+	font-size: 50px;
 }
 p {
-	color: #ff0404;
+
 }
