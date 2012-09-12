@@ -17,7 +17,7 @@
 					
 					
 			
-					<p class="attribution">&copy; <?php bloginfo('name'); ?></p>
+					<p class="attribution"><img src="<?php bloginfo('url');?>/wp-content/uploads/2012/08/logo-footer.jpg"> &copy; <?php bloginfo('name'); ?></p>
 				
 				</div> <!-- end #inner-footer -->
 				

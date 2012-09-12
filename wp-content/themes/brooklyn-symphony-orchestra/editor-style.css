@@ -1,0 +1,5 @@
+@import url("style.css");
+html .mceContentBody {
+max-width: 640px;
+background-color: white;
+}
