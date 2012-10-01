@@ -10,12 +10,21 @@ Template Name: Homepage
 
 				<div id="main" class="span12 clearfix" role="main">
 
+					<div id="smoothslider"	class="slider">
+
+						<?php
+						if ( function_exists( 'get_smooth_slider' ) ) {
+     get_smooth_slider(); }
+     					?>
+     				</div>
+
 					<?php
 
 					$use_carousel = of_get_option('showhidden_slideroptions');
       				if ($use_carousel) {
 
 					?>
+
 
 					<div id="myCarousel" class="carousel">
 

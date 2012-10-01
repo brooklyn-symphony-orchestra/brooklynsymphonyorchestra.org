@@ -77,18 +77,44 @@ h1 {
 .page-header h1  {
 	font-size: 48px;
 }
+.event h1 {
+	font-size: 36px;
+}
 h2 {
-	font-size: 30px
+	font-size: 30px;
+	text-transform: uppercase;
 }
 h2.composer {
 	font-family: "sommet-slab",serif;
 	font-style: italic;
-	font-size: 30px;
+	font-size: 26px;
+	line-height: 1em;
+	text-transform: none;
+	margin-top: 20px;
+}
+h3 {
+	font-size: 24px;
+	text-transform: uppercase;
+}
+h3.piece {
+	text-transform: none;
+	font-size: 22px;
+	color: #000000;
+	font-weight: normal;
 }
 h4 {
 	font-size: 18px;
 	text-transform: uppercase;
 }
+h5 {
+	font-size: 16px;
+	text-transform: uppercase;
+	color: #000000;
+}
+.event p.meta {
+	display: none;
+}
+
 .home #inner-footer .widget h4 {
 	font-size: 18px;
 	text-transform: uppercase;
@@ -105,7 +131,7 @@ h4 {
 	color: #000000;
 }
 .archive #main .post h3 {
-	font-size: 2.4em;
+	font-size: 1.8em;
 	line-height: 1em;
 }
 .navbar .brand {
@@ -147,6 +173,57 @@ ul {
 }
 #s {
 	width: 200px;
+}
+.page-id-3 #main li, .page-id-3 #main h3 {
+	margin-bottom: 20px;
+}
+.sidebar .widget > ul > li {
+	margin-bottom: 10px;
+}
+#main #post-84 ul, #main #post-16 ul {
+	margin-bottom: 15px;
+	margin-left: 10px;
+}
+.fb_ltr  {
+	width: 100px !important;
+}
+.em-events-search-submit {
+	margin-top: 15px;
+}
+
+.events-table tbody tr {
+	min-height: 45px;
+}
+.events-table tdbody td {
+}
+.annc-padding {
+	margin-bottom: 15px;
+}
+.formleft {
+	float: left;
+	margin-right: 20px;
+}
+.formright {
+	clear: right;
+}
+/* SLIDER */
+
+.smooth_slider {
+	width: 960px !important;
+	height: 400px !important;
+	border: none !important;
+}
+.smooth_slideri {
+	width: 960px !important;
+	height: 400px !important;
+	z-index: 100 !important;
+	margin: 0 !important;
+}
+.smooth_slideri img {
+	border: none !important;
+}
+.smooth_nav, .smooth_next, .smooth_prev {
+	z-index: 500 !important;
 }
 
 .mergeRow {

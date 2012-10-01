@@ -6,7 +6,6 @@ function my_get_posts( $query ) {
 	return $query;
 }
 
-
 class Custom_Editor_Styles {
 
 	/**
