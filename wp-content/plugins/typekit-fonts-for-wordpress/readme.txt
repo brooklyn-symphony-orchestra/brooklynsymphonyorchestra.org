@@ -3,8 +3,8 @@ Contributors: jamescollins, glenn-om4
 Donate link: http://om4.com.au/wordpress-plugins/#donate
 Tags: typekit, fonts, font, design, wp, multisite, wpmu
 Requires at least: 3.1
-Tested up to: 3.4.1
-Stable tag: 1.4
+Tested up to: 3.5
+Stable tag: 1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,6 +57,9 @@ Please see [this page](http://help.typekit.com/customer/portal/articles/6786-bro
 
 == Changelog ==
 
+= 1.5 =
+* WordPress 3.5 compatibility.
+
 = 1.4 =
 * Use the new scheme-less typekit.net embed code format ( ﻿//use.typekit.net/xyz.js ).
 
@@ -94,6 +97,9 @@ Please see [this page](http://help.typekit.com/customer/portal/articles/6786-bro
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.5 =
+* WordPress 3.5 compatibility.
 
 = 1.4 =
 * Adds support for Typekit's new embed code format.

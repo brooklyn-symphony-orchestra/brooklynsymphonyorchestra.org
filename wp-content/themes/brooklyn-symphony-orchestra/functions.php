@@ -116,6 +116,9 @@ function my_post_image_html( $html, $post_id, $post_image_id ) {
   return $html;
 
 }
+add_theme_support( 'custom-background' );
+
+
 
 /*
 Style Format Options

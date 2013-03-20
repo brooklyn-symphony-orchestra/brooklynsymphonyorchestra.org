@@ -29,6 +29,8 @@ add_action('admin_init','em_admin_actions_bookings',100);
  */
 function em_bookings_page(){
 	//First any actions take priority
+	do_action('em_bookings_admin_page');
+	if( !empty($_REQUEST['_wpnonce']) ){ $_REQUEST['_wpnonce'] = $_GET['_wpnonce'] = $_POST['_wpnonce'] = esc_attr($_REQUEST['_wpnonce']); } //XSS fix just in case here too
 	if( !empty($_REQUEST['action']) && substr($_REQUEST['action'],0,7) != 'booking' ){ //actions not starting with booking_
 		do_action('em_bookings_'.$_REQUEST['action']);
 	}elseif( !empty($_REQUEST['booking_id']) ){
@@ -50,7 +52,7 @@ function em_bookings_page(){
 function em_bookings_dashboard(){
 	global $EM_Notices;
 	?>
-	<div class='wrap'>
+	<div class='wrap em-bookings-dashboard'>
 		<?php if( is_admin() ): ?>
 		<div id='icon-users' class='icon32'>
 			<br/>
@@ -60,22 +62,26 @@ function em_bookings_dashboard(){
   		</h2>
   		<?php else: echo $EM_Notices; ?>
   		<?php endif; ?>
-		<?php if( is_admin() ): ?>
-		<div class="icon32" id="icon-bookings"><br></div>
-		<?php endif; ?>
-		<h2><?php _e('Recent Bookings','dbem'); ?></h2>	
-  		<?php
-		$EM_Bookings_Table = new EM_Bookings_Table();
-		$EM_Bookings_Table->status = get_option('dbem_bookings_approval') ? 'needs-attention':'confirmed';
-		$EM_Bookings_Table->output();
-  		?>
+  		<div class="em-bookings-recent">
+			<?php if( is_admin() ): ?>
+			<div class="icon32" id="icon-bookings"><br></div>
+			<?php endif; ?>
+			<h2><?php _e('Recent Bookings','dbem'); ?></h2>	
+	  		<?php
+			$EM_Bookings_Table = new EM_Bookings_Table();
+			$EM_Bookings_Table->status = get_option('dbem_bookings_approval') ? 'needs-attention':'confirmed';
+			$EM_Bookings_Table->output();
+	  		?>
+  		</div>
   		<br class="clear" />
-		<?php if( is_admin() ): ?>
-		<div class="icon32" id="events"><br></div>
-		<?php endif; ?>
-		<h2><?php _e('Events With Bookings Enabled','dbem'); ?></h2>		
-		<?php em_bookings_events_table(); ?>
-		<?php do_action('em_bookings_dashboard'); ?>
+  		<div class="em-bookings-events">
+			<?php if( is_admin() ): ?>
+			<div class="icon32" id="events"><br></div>
+			<?php endif; ?>
+			<h2><?php _e('Events With Bookings Enabled','dbem'); ?></h2>		
+			<?php em_bookings_events_table(); ?>
+			<?php do_action('em_bookings_dashboard'); ?>
+		</div>
 	</div>
 	<?php		
 }
@@ -194,7 +200,7 @@ function em_bookings_ticket(){
  * Shows a single booking for a single person. 
  */
 function em_bookings_single(){
-	global $EM_Booking, $EM_Notices;
+	global $EM_Booking, $EM_Notices; /* @var $EM_Booking EM_Booking */
 	//check that user can access this page
 	if( is_object($EM_Booking) && !$EM_Booking->can_manage() ){
 		?>
@@ -241,7 +247,38 @@ function em_bookings_single(){
 							<?php _e ( 'Personal Details', 'dbem' ); ?>
 						</h3>
 						<div class="inside">
-							<?php echo $EM_Booking->get_person()->display_summary(); ?>
+							<?php $no_user = get_option('dbem_bookings_registration_disable') && $EM_Booking->get_person()->ID == get_option('dbem_bookings_registration_user'); ?>
+							<div class="em-booking-person-details">
+								<?php echo $EM_Booking->get_person()->display_summary(); ?>
+								<?php if( $no_user ): ?>
+								<input type="button" id="em-booking-person-modify" value="<?php esc_attr_e('Edit Details','dbem'); ?>" />
+								<?php endif; ?>
+							</div>
+							<?php if( $no_user ): ?>
+							<form action="" method="post" class="em-booking-person-form">
+								<div class="em-booking-person-editor" style="display:none;">
+									<?php echo $EM_Booking->get_person_editor(); ?>
+								 	<input type='hidden' name='action' value='booking_modify_person'/>
+								 	<input type='hidden' name='booking_id' value='<?php echo $EM_Booking->booking_id; ?>'/>
+								 	<input type='hidden' name='event_id' value='<?php echo $EM_Event->event_id; ?>'/>
+								 	<input type='hidden' name='_wpnonce' value='<?php echo wp_create_nonce('booking_modify_person_'.$EM_Booking->booking_id); ?>'/>
+									<input type="submit" class="em-booking-person-modify-submit" id="em-booking-person-modify-submit" value="<?php _e('Submit Changes', 'dbem'); ?>" />
+									<input type="button" id="em-booking-person-modify-cancel" value="<?php esc_attr_e('Cancel','dbem'); ?>" />
+								</div>
+							</form>	
+							<script type="text/javascript">
+								jQuery(document).ready( function($){
+									$('#em-booking-person-modify').click(function(){
+										$('.em-booking-person-details').hide();
+										$('.em-booking-person-editor').show();
+									});
+									$('#em-booking-person-modify-cancel').click(function(){
+										$('.em-booking-person-details').show();
+										$('.em-booking-person-editor').hide();
+									});
+								});
+							</script>				
+							<?php endif; ?>
 							<?php do_action('em_bookings_admin_booking_person', $EM_Booking); ?>
 						</div>
 					</div> 	
@@ -282,10 +319,11 @@ function em_bookings_single(){
 								 	<input type='hidden' name='booking_id' value='<?php echo $EM_Booking->booking_id; ?>'/>
 								 	<input type='hidden' name='event_id' value='<?php echo $EM_Event->event_id; ?>'/>
 								 	<input type='hidden' name='_wpnonce' value='<?php echo wp_create_nonce('booking_set_status_'.$EM_Booking->booking_id); ?>'/>
+									<br /><em><?php _e('<strong>Notes:</strong> Ticket availability not taken into account when approving new bookings (i.e. you can overbook).','dbem'); ?></em>
 								</form>
 							</div>
-							<form action="" method="post">
-								<table class="em-tickets-bookings-table" cellspacing="0" cellpadding="0">
+							<form action="" method="post" class="em-booking-form">
+								<table class="em-tickets-bookings-table" cellpadding="0" cellspacing="0">
 									<thead>
 									<tr>
 										<th><?php _e('Ticket Type','dbem'); ?></th>
@@ -296,14 +334,17 @@ function em_bookings_single(){
 									<tbody>
 										<?php foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $EM_Ticket_Booking): ?>
 										<tr>
-											<td class="ticket-type"><a class="row-title" href="<?php echo em_add_get_params($EM_Event->get_bookings_url(), array('ticket_id'=>$EM_Ticket_Booking->get_ticket()->ticket_id)); ?>"><?php echo $EM_Ticket_Booking->get_ticket()->ticket_name ?></a></td>
+											<td class="ticket-type"><a class="row-title" href="<?php echo em_add_get_params($EM_Event->get_bookings_url(), array('ticket_id'=>$EM_Ticket_Booking->ticket_id)); ?>"><?php echo $EM_Ticket_Booking->get_ticket()->ticket_name ?></a></td>
 											<td>
 												<span class="em-booking-single-info"><?php echo $EM_Ticket_Booking->get_spaces(); ?></span>
-												<div class="em-booking-single-edit"><input name="em_tickets[<?php echo $EM_Ticket_Booking->get_ticket()->ticket_id; ?>][spaces]" class="em-ticket-select" value="<?php echo $EM_Ticket_Booking->get_spaces(); ?>" /></div>
+												<div class="em-booking-single-edit"><input name="em_tickets[<?php echo $EM_Ticket_Booking->ticket_id; ?>][spaces]" class="em-ticket-select" id="em-ticket-spaces-<?php echo $EM_Ticket_Booking->ticket_id; ?>" value="<?php echo $EM_Ticket_Booking->get_spaces(); ?>" /></div>
 											</td>
 											<td><?php echo $EM_Ticket_Booking->get_price(true,true); ?></td>
 										</tr>
-										<?php $shown_tickets[] = $EM_Ticket_Booking->ticket_id; ?>
+										<?php 
+											$shown_tickets[] = $EM_Ticket_Booking->ticket_id;
+											do_action('em_bookings_admin_ticket_row', $EM_Ticket_Booking->get_ticket(), $EM_Booking); 
+										?>
 										<?php endforeach; ?>
 										<?php if( count($shown_tickets) < count($EM_Event->get_bookings()->get_tickets()->tickets)): ?><tr>
 											<?php foreach($EM_Event->get_bookings()->get_tickets()->tickets as $EM_Ticket): ?>
@@ -312,10 +353,11 @@ function em_bookings_single(){
 													<td class="ticket-type"><a class="row-title" href="<?php echo em_add_get_params($EM_Event->get_bookings_url(), array('ticket_id'=>$EM_Ticket->ticket_id)); ?>"><?php echo $EM_Ticket->ticket_name ?></a></td>
 													<td>
 														<span class="em-booking-single-info">0</span>
-														<div class="em-booking-single-edit"><input name="em_tickets[<?php echo $EM_Ticket->ticket_id; ?>][spaces]" class="em-ticket-select" value="0" /></div>
+														<div class="em-booking-single-edit"><input name="em_tickets[<?php echo $EM_Ticket->ticket_id; ?>][spaces]" class="em-ticket-select" id="em-ticket-spaces-<?php echo $EM_Ticket_Booking->ticket_id; ?>" value="0" /></div>
 													</td>
 													<td><?php echo em_get_currency_symbol() ?>0.00</td>
 												</tr>
+												<?php do_action('em_bookings_admin_ticket_row', $EM_Ticket, $EM_Booking); ?>
 												<?php endif; ?>
 											<?php endforeach; ?>
 										<?php endif; ?>
@@ -453,7 +495,10 @@ function em_bookings_person(){
   		<h2>
   			<?php _e('Manage Person\'s Booking', 'dbem'); ?>
   			<?php if( current_user_can('edit_users') ) : ?>
-  			<a href="<?php admin_url('user-edit.php?user_id='.$EM_Person->ID); ?>" class="button add-new-h2"><?php _e('Edit User','dbem') ?></a>
+  			<a href="<?php echo admin_url('user-edit.php?user_id='.$EM_Person->ID); ?>" class="button add-new-h2"><?php _e('Edit User','dbem') ?></a>
+  			<?php endif; ?>
+  			<?php if( current_user_can('delete_users') ) : ?>
+  			<a href="<?php echo wp_nonce_url( "users.php?action=delete&amp;user=$EM_Person->ID", 'bulk-users' ); ?>" class="button add-new-h2"><?php _e('Delete User','dbem') ?></a>
   			<?php endif; ?>
   		</h2>
   		<?php if( !is_admin() ) echo $EM_Notices; ?>

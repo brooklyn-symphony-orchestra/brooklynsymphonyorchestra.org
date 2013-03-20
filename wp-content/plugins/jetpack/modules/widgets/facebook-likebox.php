@@ -1,6 +1,15 @@
 <?php
 
 /**
+ * Register the widget for use in Appearance -> Widgets
+ */
+add_action( 'widgets_init', 'jetpack_facebook_likebox_init' );
+
+function jetpack_facebook_likebox_init() {
+	register_widget( 'WPCOM_Widget_Facebook_LikeBox' );
+}
+
+/**
  * Facebook Like Box widget class
  * Display a Facebook Like Box as a widget
  * http://developers.facebook.com/docs/reference/plugins/like-box/
@@ -17,7 +26,14 @@ class WPCOM_Widget_Facebook_LikeBox extends WP_Widget {
 	private $allowed_colorschemes = array( 'light', 'dark' );
 
 	function __construct() {
-		parent::__construct( 'facebook-likebox', __( 'Facebook Like Box', 'jetpack' ), array( 'classname' => 'widget_facebook_likebox', 'description' => __( 'Display a Facebook Like Box to connect visitors to your Facebook Page', 'jetpack' ) ) );
+		parent::__construct(
+			'facebook-likebox',
+			apply_filters( 'jetpack_widget_name', __( 'Facebook Like Box', 'jetpack' ) ),
+			array(
+				'classname' => 'widget_facebook_likebox',
+				'description' => __( 'Display a Facebook Like Box to connect visitors to your Facebook Page', 'jetpack' )
+			)
+		);
 	}
 
 	function widget( $args, $instance ) {
@@ -29,7 +45,7 @@ class WPCOM_Widget_Facebook_LikeBox extends WP_Widget {
 		if ( empty( $like_args['href'] ) || ! $this->is_valid_facebook_url( $like_args['href'] ) ) {
 			if ( current_user_can('edit_theme_options') ) {
 				echo $before_widget;
-				echo '<p>' . sprintf( __( 'It looks like your Facebook URL is incorrectly configured. Please check it in your <a href="%s">widget settings</a>.' ), admin_url( 'widgets.php' ) ) . '</p>';
+				echo '<p>' . sprintf( __( 'It looks like your Facebook URL is incorrectly configured. Please check it in your <a href="%s">widget settings</a>.', 'jetpack' ), admin_url( 'widgets.php' ) ) . '</p>';
 				echo $after_widget;
 			}
 			echo '<!-- Invalid Facebook Page URL -->';
@@ -244,26 +260,33 @@ class WPCOM_Widget_Facebook_LikeBox extends WP_Widget {
 	}
 	
 	function guess_locale_from_lang( $lang ) {
-		$lang = strtolower( str_replace( '-', '_', $lang ) );
-
-		if ( 5 == strlen( $lang ) ) {
-			$lang = substr( $lang, 0, 3 ) . strtoupper( substr( $lang, 3, 2 ) );
-		} else if ( 3 == strlen( $lang ) ) {
-			$lang = $lang;
-		} else {
-			$lang = $lang . '_' . strtoupper( $lang );
+		if ( 'en' == $lang || 'en_US' == $lang || !$lang ) {
+			return 'en_US';
 		}
-	
-		if ( 'en_EN' == $lang ) {
-			$lang = 'en_US';
-		} else if ( 'he_HE' == $lang ) {
-			$lang = 'he_IL';
-		} else if ( 'ja_JA' == $lang )
-			$lang = 'ja_JP';
 
-		return $lang;
+		if ( !class_exists( 'GP_Locales' ) ) {
+			if ( !defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) || !file_exists( JETPACK__GLOTPRESS_LOCALES_PATH ) ) {
+				return false;
+			}
+
+			require JETPACK__GLOTPRESS_LOCALES_PATH;
+		}
+
+		if ( defined( 'IS_WPCOM' ) && IS_WPCOM ) {
+			// WP.com: get_locale() returns 'it'
+			$locale = GP_Locales::by_slug( $lang );
+		} else {
+			// Jetpack: get_locale() returns 'it_IT';
+			$locale = GP_Locales::by_field( 'wp_locale', $lang );
+		}
+
+		if ( !$locale || empty( $locale->facebook_locale ) ) {
+			return false;
+		}
+
+		return $locale->facebook_locale;
 	}
-	
+
 	function get_locale() {
 		return $this->guess_locale_from_lang( get_locale() );
 	}

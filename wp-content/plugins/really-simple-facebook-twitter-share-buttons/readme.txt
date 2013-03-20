@@ -1,10 +1,10 @@
 === Really simple Facebook Twitter share buttons ===
 Contributors: whiletrue
 Donate link: http://www.whiletrue.it/
-Tags: facebook, twitter, facebook share, twitter share, facebook share button, twitter share button, linkedin, google +1, +1, pinterest, google buzz, buzz, digg, flattr, stumbleupon, hyves, links, post, page, mail, email, reddit, tipy, tumblr, shortcode
+Tags: facebook, twitter, facebook share, twitter share, facebook share button, twitter share button, linkedin, google +1, +1, pinterest, google buzz, buzz, digg, flattr, stumbleupon, hyves, links, post, page, mail, email, reddit, tipy, tumblr, buffer, pinzout, shortcode
 Requires at least: 2.9+
-Tested up to: 3.4.1
-Stable tag: 2.5.7
+Tested up to: 3.5.1
+Stable tag: 2.9.2
 
 Puts Facebook, Twitter, LinkedIn, Google "+1", Pinterest, Tumblr and other share buttons of your choice above or below your posts.
 
@@ -12,35 +12,56 @@ Puts Facebook, Twitter, LinkedIn, Google "+1", Pinterest, Tumblr and other share
 This plugin shows Facebook, Twitter, LinkedIn, Google "+1", Pinterest and other popular share buttons above or below your posts.
 Easy customization of active buttons and position in the Settings menu.
 
-Facebook Like and Twitter Share buttons are loaded by default. 
-Other buttons, including Digg, Facebook Send, Flattr, LinkedIn, Google "+1", Pinterest, Google Buzz, Stumbleupon, Hyves, Email, Reddit, Tipy, Tumblr and Buffer can be added through the `Settings->Really simple share` menu.
+In contrast to several other sharing plugin, this one aims to use only original code provided by any social network.
+There is no other service in the middle, you are not required to register or get a key to use it. Enjoy!
+
+Facebook Like, Twitter and Google +1 share buttons are loaded by default. 
+Other buttons, including Digg, Facebook Send, Flattr, LinkedIn, Pinterest, Google Buzz, Stumbleupon, Hyves, Email, Reddit, Tipy, Tumblr, Buffer, Pinzout (and the deprecated Facebook Share button) can be added through the `Settings->Really simple share` menu.
 
 Please be careful when selecting the `Show buttons in these pages` options : it can interact badly with other slide/fade/carousel/sidebar active plugins.
 
+= Shortcode =
+
 If you want to place the active buttons only in selected posts, use the [really_simple_share] shortcode.
+
+If you want to place only one share button, add the *button* attribute to the shortcode, e.g.:
+
+* [really_simple_share button="facebook_like"]
+* [really_simple_share button="twitter"]
+* [really_simple_share button="linkedin"]
+* [really_simple_share button="pinterest"] (only displays if there is at least one picture in the post or page)
+* [really_simple_share button="google1"]
+* [really_simple_share button="digg"]
+* [really_simple_share button="stumbleupon"]
+* [really_simple_share button="reddit"]
+* [really_simple_share button="flattr"]
+* [really_simple_share button="tumblr"]
+* [really_simple_share button="facebook_share"]
+* and so on...
+
+Please note that in order to place single share buttons, they have to be active in the plugin settings page.
+
+= Selective disable =
 
 If you want to hide the share buttons inside selected posts, set a "really_simple_share_disable" custom field with value "yes".
 
-For more informations: [www.whiletrue.it](http://www.whiletrue.it/en/projects/wordpress/22-really-simple-facebook-twitter-share-buttons-per-wordpress.html "www.whiletrue.it")
+= News =
 
-*New* in version 2.5:
+*New* in version 2.9:
 
-* Pinterest multiple image selector (thanks Stephen Baugh)
-* Google Buzz button removed (Google dropped support to it)
-* Buffer button (basic support: no twitter user mention, no image support)
-* Tumblr button (basic support: no display option)
-* Optional related Twitter usernames (comma separated) added to the follow list
-* Facebook Share button new limited version (no counter, no style), facing its dropped support by Facebook 
-* Fixes and code cleaning, as always 
+* Pinterest button complete rewrite
+* Pinterest button fallback: when no media is found, shows the multiple image selector
+* Code cleaning
+
+= Reference =
+
+For more info on this plugin: [www.whiletrue.it](http://www.whiletrue.it/really-simple-facebook-twitter-share-buttons-for-wordpress/ "www.whiletrue.it")
 
 Do you like this plugin? Give a chance to our other works:
 
-* [Most and Least Read Posts](http://www.whiletrue.it/en/projects/wordpress/29-most-and-least-read-posts-widget-per-wordpress.html "Most and Least Read Posts")
-* [Random Tweet Widget](http://www.whiletrue.it/en/projects/wordpress/33-random-tweet-widget-per-wordpress.html "Random Tweet Widget")
-* [Reading Time](http://www.whiletrue.it/en/projects/wordpress/17-reading-time-per-wordpress.html "Reading Time")
-* [Really Simple Twitter Feed Widget](http://www.whiletrue.it/en/projects/wordpress/25-really-simple-twitter-feed-widget-per-wordpress.html "Really Simple Twitter Feed Widget")
-* [Tilted Tag Cloud Widget](http://www.whiletrue.it/en/projects/wordpress/36-tilted-tag-cloud-widget-per-wordpress.html "Tilted Tag Cloud Widget")
-* [Tilted Twitter Cloud Widget](http://www.whiletrue.it/en/projects/wordpress/26-tilted-twitter-cloud-widget-per-wordpress.html "Tilted Twitter Cloud Widget")
+* [Most and Least Read Posts](http://www.whiletrue.it/most-and-least-read-posts-widget-for-wordpress/ "Most and Least Read Posts")
+* [Tilted Tag Cloud Widget](http://www.whiletrue.it/tilted-tag-cloud-widget-per-wordpress/ "Tilted Tag Cloud Widget")
+* [Reading Time](http://www.whiletrue.it/reading-time-for-wordpress/ "Reading Time")
 
 == Installation ==
 Best is to install directly from WordPress. If manual installation is required, please make sure to put all of the plugin files in a folder named `really-simple-facebook-twitter-share-buttons` (not two nested folders) in the plugin directory, then activate the plugin through the `Plugins` menu in WordPress.
@@ -66,10 +87,18 @@ Plus, the div surrounding all buttons has its own class "really_simple_share".
 If you want to override default styling of the buttons, check the `disable default styles` option add your style rules inside your css theme file.
 
 = Is it possible to show the buttons anywhere inside my theme, using a PHP function? =
-Yes, you can call the really_simple_share_publish($link='', $title='') PHP function, passing it the link and the title used by the buttons.
+Yes, you can call this PHP function:
+`<?php echo really_simple_share_publish($link='', $title=''); ?>` 
+You can pass the share link and the title as parameters.
 You shouldn't leave the parameters blank, unless the code is put inside the WP loop.
 For example, use this code to create buttons linking to the website home page:
-echo really_simple_share_publish(get_bloginfo('url'), get_bloginfo('name')); 
+`<?php echo really_simple_share_publish(get_bloginfo('url'), get_bloginfo('name'));  ?>`
+
+= Sometimes the Pinterest PinIt button doesn't appear in some posts. =
+The PinIt button requires some media to share, so it only shows up when the post contains at least one image.
+
+= I've cheched the "show counter" option in the Settings page, but sometimes the Pinterest PinIt button's counter doesn't appear. =
+The PinIt counter only appear if the post has been shared at least once. Also, the refresh time for the PinIt counter could be long. 
 
 = How about other social networks? =
 We'll see!
@@ -81,6 +110,70 @@ We'll see!
 
 
 == Changelog ==
+
+= 2.9.2 =
+* Changed: Little display cleaning
+* Changed: Little default options cleaning
+* Changed: Little translations cleaning
+
+= 2.9.1 =
+* Added: New `really_simple_share_box` CSS class for box layout
+* Added: New `really_simple_share_button` CSS class for button layout
+* Fixed: Pinterest box layout vertical offset
+* Fixed: Pinterest post image search only when in loop
+* Fixed: Email button image theme-aware CSS style
+
+= 2.9 =
+* Changed: Pinterest button complete rewrite
+* Changed: Pinterest button fallback: when no media is found, shows the multiple image selector
+* Changed: Code cleaning
+
+= 2.8.2 =
+* Fixed: Flattr button height issue while showing in box size
+
+= 2.8.1 =
+* Fixed: Facebook Like button Html5 code locale and action (like/recommend)
+
+= 2.8 =
+* Added: Facebook app ID setting for the Facebook Like button (recommended)
+* Added: Facebook Like button Html5 code (recommended if your theme supports it)
+
+= 2.7 =
+* Added: support for translations
+* Added: Italian translation
+
+= 2.6.3 =
+* Changed: CSS improvement on the block surrounding the buttons
+
+= 2.6.2 =
+* Added: Multi language support: if the WPML plugin is active, language is set automatically for each button
+
+= 2.6.1 =
+* Changed: Pinterest button update (please clear cache on update)
+
+= 2.6 =
+* Added: Pinzout button
+* Added: Comments RSS Feed button
+* Changed: improved CSS file with iframe border cleaning
+* Changed: new default options (Google +1 enabled by default)
+* Fixed: code cleaning and better assets inclusion
+* Happy new year 2013!
+
+= 2.5.11 =
+* Added: Facebook Share button text customization
+
+= 2.5.10 =
+* Fixed: php code notices
+
+= 2.5.9 =
+* Changed: different file inclusion code
+* Fixed: Facebook Like button width fix
+* Fixed: "Missing Title Tags" error solved for the PinIt image selection iframe
+
+= 2.5.8 =
+* Added: shortcode single button options 
+* Changed: screenshots moved outside, reducing the size of the plugin and allowing for faster updates
+* Changed: separate images folder, for plugin structure cleaning
 
 = 2.5.7 =
 * Changed: Pinterest multiple image selector made optional (doesn't work in some environments)
@@ -332,6 +425,6 @@ Initial release
 
 * Reset default options
 * Share buttons widget
-* Shortcodes for single buttons
+* Multilanguage support
 * New "report" button
 * Counter for the "mail" button

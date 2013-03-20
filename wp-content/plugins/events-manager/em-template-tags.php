@@ -360,27 +360,38 @@ function em_locations_admin($args = array()){
 			}
 			em_location_form();
 		}else{
-			$url = empty($url) ? $_SERVER['REQUEST_URI']:$url; //url to this page
 			$limit = ( !empty($_REQUEST['limit']) ) ? $_REQUEST['limit'] : 20;//Default limit
 			$page = ( !empty($_REQUEST['pno']) ) ? $_REQUEST['pno']:1;
 			$offset = ( $page > 1 ) ? ($page-1)*$limit : 0;
-			$args = array('limit'=>$limit, 'offset'=>$offset, 'status'=>false, 'blog'=>false);
+			$order = ( !empty($_REQUEST ['order']) ) ? $_REQUEST ['order']:'ASC';
+			if( array_key_exists('status', $_REQUEST) ){
+				$status = ($_REQUEST['status']) ? 1:0;
+			}else{
+				$status = false;
+			}
+			$blog = false;
+			if( EM_MS_GLOBAL && !get_site_option('dbem_ms_mainblog_locations') && !is_main_site() ){
+			    //set current blog id if not on main site and using global mode whilst not forcing all locations to be on main blog
+			    $blog = get_current_blog_id();
+			}
+			$args = array('limit'=>$limit, 'offset'=>$offset, 'status'=>$status, 'blog'=>$blog);
+			//count locations
+			$locations_mine_count = EM_Locations::count( array('owner'=>get_current_user_id(), 'blog'=>$blog, 'status'=>false) );
+			$locations_all_count = current_user_can('read_others_locations') ? EM_Locations::count(array('blog'=>$blog, 'status'=>false, 'owner'=>false)):0;
+			//get set of locations
 			if( !empty($_REQUEST['view']) && $_REQUEST['view'] == 'others' && current_user_can('read_others_locations') ){
 				$locations = EM_Locations::get($args);
-				$locations_count = EM_Locations::count(array('status'=>false, 'blog'=>false, 'owner'=>false));
+				$locations_count = $locations_all_count;
 			}else{
 				$locations = EM_Locations::get( array_merge($args, array('owner'=>get_current_user_id())) );
-				$locations_count = EM_Locations::count(array('status'=>false, 'blog'=>false, 'owner'=>get_current_user_id()));
+				$locations_count = $locations_mine_count;
 			}
-			$locations_mine_count = EM_Locations::count( array('owner'=>get_current_user_id(), 'blog'=>false, 'status'=>false) );
-			$locations_all_count = current_user_can('read_others_locations') ? EM_Locations::count(array('blog'=>false, 'status'=>false)):0;
 			em_locate_template('tables/locations.php',true, array(
 				'args'=>$args, 
 				'locations'=>$locations, 
 				'locations_count'=>$locations_count, 
 				'locations_mine_count'=>$locations_mine_count,
 				'locations_all_count'=>$locations_all_count,
-				'url' => $url,
 				'page' => $page,
 				'limit' => $limit,
 				'offset' => $offset,
@@ -471,7 +482,27 @@ function em_is_calendar_day_page(){
  * Is this a a single category page?
  * @return boolean
  */
-function em_is_category_page(){
+function em_is_category_page( $category = false ){
+    if( !empty($category) ){
+        global $wp_query, $post, $em_category_id;
+        if( is_tax(EM_TAXONOMY_CATEGORY, $category) ){ return true; }
+        if( !empty($wp_query->em_category_id) || ($post->ID == get_option('dbem_categories_page') && !empty($em_category_id)) ){
+			$cat_id = !empty($wp_query->em_category_id) ? $wp_query->em_category_id:$em_category_id;
+            $EM_Category = em_get_category($cat_id);
+            if( is_array($category) ){
+                $is_category = array();
+                foreach( $category as $id_or_term ){
+                    $is_category[] = is_numeric($id_or_term) ? $EM_Category->id == $id_or_term : ($EM_Category->slug == $id_or_term || $EM_Category->name == $id_or_term);
+                }
+                return in_array(true, $is_category);
+            }else{
+                $is_category = is_numeric($category) ? $EM_Category->id == $category : ($EM_Category->slug == $category  || $EM_Category->name == $category);
+                return $is_category;
+            }
+            return false;
+        }
+        return false;
+    }
 	return em_get_page_type() == 'category';
 }
 /**
@@ -480,6 +511,34 @@ function em_is_category_page(){
  */
 function em_is_categories_page(){
 	return em_get_page_type() == 'categories';
+}
+
+/**
+ * Is this a a single category page?
+ * @return boolean
+ */
+function em_is_tag_page( $tag = false ){
+	if( !empty($tag) ){
+		global $wp_query, $post, $em_tag_id;
+		if( is_tax(EM_TAXONOMY_TAG, $tag) ){ return true; }
+		if( !empty($wp_query->em_tag_id) || !empty($em_tag_id) ){
+			$tag_id = !empty($wp_query->em_tag_id) ? $wp_query->em_tag_id:$em_tag_id;
+			$EM_Tag = em_get_tag($tag_id);
+			if( is_array($tag) ){
+				$is_tag = array();
+				foreach( $tag as $id_or_term ){
+					$is_tag[] = is_numeric($id_or_term) ? $EM_Tag->id == $id_or_term : ($EM_Tag->slug == $id_or_term || $EM_Tag->name == $id_or_term);
+				}
+				return in_array(true, $is_tag);
+			}else{
+				$is_tag = is_numeric($tag) ? $EM_Tag->id == $tag : ($EM_Tag->slug == $tag || $EM_Tag->name == $tag);
+				return $is_tag;
+			}
+			return false;
+		}
+		return false;
+	}
+	return em_get_page_type() == 'tag';
 }
 
 /**

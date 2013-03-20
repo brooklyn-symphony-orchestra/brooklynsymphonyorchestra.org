@@ -3,8 +3,8 @@ Contributors: petervanderdoes
 Donate link: http://blog.avirtualhome.com/wordpress-plugins/
 Tags: extended, categories, widget, top categories
 Requires at least: 2.3
-Tested up to: 3.3
-Stable tag: 3.6.5
+Tested up to: 3.5
+Stable tag: 3.6.7
 
 The AVH Extended Categories Widgets gives you three widgets for displaying categories.
 == Description ==
@@ -65,6 +65,7 @@ Translations:
 * Dutch - Nederlands (nl_NL)
 * German - Deutsch (de_DE)
 * Greek (el)
+* French - Français (fr_FR)
 * Indonesian - Bahasa Indonesia (id_ID)
 * Italian - Italiano (it_IT)
 * Russian — Русский (ru_RU)
@@ -134,6 +135,14 @@ Whether Widget 2 shows Movie or Music depends on the creation order of groups. I
 None
 
 == Changelog ==
+= Version 3.6.7 =
+*  Fix error in SQL syntax
+
+= Version 3.6.6 =
+* Missed a translatable string.
+* Add French translation.
+* Fix for WordPress 3.5
+
 = Version 3.6.5 =
 * Bugfix: Can not delete category groups
 

@@ -20,21 +20,27 @@ function sharing_email_send_post( $data ) {
 
 function sharing_add_meta_box() {
 	$post_types = get_post_types( array( 'public' => true ) );
-
+	$title = apply_filters( 'sharing_meta_box_title', __( 'Sharing', 'jetpack' ) );
 	foreach( $post_types as $post_type ) {
-		add_meta_box( 'sharing_meta', __( 'Sharing', 'jetpack' ), 'sharing_meta_box_content', $post_type, 'advanced', 'high' );
+		add_meta_box( 'sharing_meta', $title, 'sharing_meta_box_content', $post_type, 'advanced', 'high' );
 	}
 }
 
 function sharing_meta_box_content( $post ) {
-	$sharing_checked = get_post_meta( $post->ID, 'sharing_disabled', false );
+	do_action( 'start_sharing_meta_box_content', $post );
 
-	if ( empty( $sharing_checked ) || $sharing_checked === false )
-		$sharing_checked = ' checked="checked"';
-	else
-		$sharing_checked = '';
+	$disabled = get_post_meta( $post->ID, 'sharing_disabled', true ); ?>
 
-	echo '<p><label for="enable_post_sharing"><input name="enable_post_sharing" id="enable_post_sharing" value="1"' . $sharing_checked . ' type="checkbox"> ' . __( 'Show sharing buttons on this post.', 'jetpack' ) . '</label><input type="hidden" name="sharing_status_hidden" value="1" /></p>';
+	<p>
+		<label for="enable_post_sharing">
+			<input type="checkbox" name="enable_post_sharing" id="enable_post_sharing" value="1" <?php checked( !$disabled ); ?>>
+			<?php _e( 'Show sharing buttons.' , 'jetpack'); ?>
+		</label>
+		<input type="hidden" name="sharing_status_hidden" value="1" />
+	</p>
+
+	<?php
+	do_action( 'end_sharing_meta_box_content', $post );
 }
 
 function sharing_meta_box_save( $post_id ) {
@@ -101,10 +107,6 @@ function sharing_disable_js() {
 	return false;
 }
 
-if ( !function_exists( 'sharing_register_post_for_share_counts' ) ) {
-	function sharing_register_post_for_share_counts() {}
-}
-
 function sharing_global_resources() {
 	$disable = get_option( 'sharedaddy_disable_resources' );
 ?>
@@ -133,20 +135,17 @@ function sharing_email_check( $true, $post, $data ) {
 	return $recaptcha_result->is_valid;
 }
 
-// Only run if PHP5
-if ( version_compare( phpversion(), '5.0', '>=' ) ) {
-	add_action( 'init', 'sharing_init' );
-	add_action( 'admin_init', 'sharing_add_meta_box' );
-	add_action( 'save_post', 'sharing_meta_box_save' );
-	add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-	add_action( 'sharing_global_options', 'sharing_global_resources' );
-	add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-	add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-	add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-	add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-	
-	if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-		add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-		add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-	}
+add_action( 'init', 'sharing_init' );
+add_action( 'admin_init', 'sharing_add_meta_box' );
+add_action( 'save_post', 'sharing_meta_box_save' );
+add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
+add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
+add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
+add_filter( 'sharing_services', 'sharing_restrict_to_single' );
+add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
+add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
+
+if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
+	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
+	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }

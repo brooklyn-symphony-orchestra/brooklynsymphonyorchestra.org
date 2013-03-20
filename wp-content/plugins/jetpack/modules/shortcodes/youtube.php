@@ -140,6 +140,7 @@ function youtube_sanitize_url( $url ) {
 function get_youtube_id( $url ) {
 	$url = youtube_sanitize_url( $url );
 	$url = parse_url( $url );
+	$id  = false;
 
 	if ( ! isset( $url['query'] ) )
 		return false;
@@ -149,7 +150,8 @@ function get_youtube_id( $url ) {
 	if ( ! isset( $qargs['v'] ) && ! isset( $qargs['list'] ) )
 		return false;
 
-	$id = preg_replace( '|[^_a-z0-9-]|i', '', $qargs['list'] );
+	if ( isset( $qargs['list'] ) )
+		$id = preg_replace( '|[^_a-z0-9-]|i', '', $qargs['list'] );
 
 	if ( empty( $id ) )
 		$id = preg_replace( '|[^_a-z0-9-]|i', '', $qargs['v'] );
@@ -174,12 +176,6 @@ function youtube_id( $url ) {
 		return false;
 
 	parse_str( $url['query'], $qargs );
-
-	$agent = $_SERVER['HTTP_USER_AGENT'];
-	// Bloglines & Google Reader handle YouTube well now, instead of
-	// big blank space of yester year, so they can skip this treatment
-	if ( is_feed() && ! preg_match( '#' . apply_filters( 'jetpack_shortcode_youtube_whitelist_user_agents', 'Bloglines|FeedFetcher-Google|feedburner' ) . '#i', $agent ) )
-		return '<span style="text-align:center; display: block;"><a href="' . get_permalink() . '"><img src="http://img.youtube.com/vi/' . $id . '/2.jpg" alt="" /></a></span>';
 
 	// calculate the width and height, taking content_width into consideration
 	global $content_width;

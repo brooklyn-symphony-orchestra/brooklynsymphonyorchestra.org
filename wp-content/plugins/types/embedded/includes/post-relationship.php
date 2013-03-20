@@ -5,7 +5,7 @@
 require_once WPCF_EMBEDDED_INC_ABSPATH . '/editor-support/post-relationship-editor-support.php';
 
 add_action('wpcf_admin_post_init', 'wpcf_pr_admin_post_init_action', 10, 4);
-//add_action('save_post', 'wpcf_pr_admin_save_post_hook', 10, 2);
+add_action('save_post', 'wpcf_pr_admin_save_post_hook', 10, 2);
 add_filter('get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4);
 
 /**
@@ -282,7 +282,7 @@ function wpcf_pr_admin_post_meta_box_has_form_headers($post, $post_type,
         }
     } else {
         $item = new stdClass();
-        $item->ID = 'new_' . mt_rand();
+        $item->ID = 'new_' . wpcf_unique_id(serialize($post));
         $item->post_title = '';
         $item->post_content = '';
         $item->post_type = $post_type;
@@ -524,7 +524,7 @@ function wpcf_pr_admin_post_meta_box_has_row($post, $post_type, $data,
     // Set item
     if (empty($item)) {
         $item = new stdClass();
-        $item->ID = 'new_' . mt_rand();
+        $item->ID = 'new_' . wpcf_unique_id(serialize($post));
         $item->post_title = '';
         $item->post_content = '';
         $item->post_type = $post_type;
@@ -964,6 +964,9 @@ function wpcf_pr_admin_update_belongs($post_id, $data) {
         update_post_meta($post_id, '_wpcf_belongs_' . $post_type . '_id',
                 $post_owner_id);
         return __('Post updated', 'wpcf');
+    } else if (intval($post_owner_id) == 0) {
+        delete_post_meta($post_id, '_wpcf_belongs_' . $post_type . '_id');
+        return __('Post updated', 'wpcf');
     }
     return __('Passed wrong parameters', 'wpcf');
 }
@@ -1075,6 +1078,10 @@ function wpcf_pr_admin_save_post_hook($parent_post_id) {
     }
     // Save child items
     if (defined('DOING_AJAX') && !isset($_REQUEST['wpcf_action'])) {
+        return array();
+    }
+    // ONLY AJAX
+    if (!defined('DOING_AJAX') || !isset($_REQUEST['wpcf_action'])) {
         return array();
     }
     remove_action('save_post', 'wpcf_pr_admin_save_post_hook', 10, 2);
@@ -1224,4 +1231,96 @@ function wpcf_pr_add_field_js() {
         }
     </script>
     <?php
+}
+
+function wpcf_post_relationship_set_translated_parent($child_post_id) {
+
+    // WPML check if it's translation of a child
+    // Fix up the parent if it's the child of a related post and it doesn't yet have a parent
+    if (function_exists('icl_object_id')) {
+
+        remove_filter('get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4);
+
+        $post = get_post($child_post_id);
+        $original_post_id = icl_object_id($child_post_id, $post->post_type,
+                false);
+        if (!empty($original_post_id)) {
+            // it has a translation
+            $original_post = get_post($original_post_id);
+            if (!empty($original_post)) {
+
+                // look for _wpcf_belongs_xxxx_id fields.
+
+                $metas = get_post_custom($original_post->ID);
+                foreach ($metas as $meta_key => $meta) {
+                    if (strpos($meta_key, '_wpcf_belongs_') !== false) {
+                        $meta_post = get_post($meta[0]);
+                        if (!empty($meta_post)) {
+                            global $sitepress;
+                            $ulanguage = $sitepress->get_language_for_element($child_post_id,
+                                    'post_' . $post->post_type);
+                            $meta_translated_id = icl_object_id($meta_post->ID,
+                                    $meta_post->post_type, false, $ulanguage);
+                            if ($meta_translated_id) {
+                                // Set the parent to be the translated parent
+                                update_post_meta($child_post_id, $meta_key,
+                                        $meta_translated_id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        add_filter('get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4);
+    }
+}
+
+function wpcf_post_relationship_set_translated_children($parent_post_id) {
+
+    // WPML check if it's translation of a child
+    // Fix up the parent if it's the child of a related post and it doesn't yet have a parent
+    if (function_exists('icl_object_id')) {
+
+        $post = get_post($parent_post_id);
+        
+        global $sitepress;
+        $ulanguage = $sitepress->get_language_for_element($parent_post_id,
+                        'post_' . $post->post_type);
+
+        remove_filter('get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4);
+
+        $original_post_id = icl_object_id($parent_post_id, $post->post_type, false);
+        if (!empty($original_post_id)) {
+            // it has a translation
+            $original_post = get_post($original_post_id);
+            if (!empty($original_post)) {
+
+                // look for _wpcf_belongs_xxxx_id fields.
+                
+                $meta_key = '_wpcf_belongs_' . $original_post->post_type . '_id';
+
+                global $wpdb;
+                
+                $query = "SELECT post_id FROM $wpdb->postmeta WHERE meta_key= %s AND meta_value= %d";
+                $original_children = $wpdb->get_col($wpdb->prepare($query, $meta_key, $original_post_id));
+
+                foreach ($original_children as $child_id) {
+                    
+                    $child_post = get_post($child_id);
+                    
+                    // set if the child is tranlated
+                    $translated_child_id = icl_object_id($child_id,
+                                $child_post->post_type, false, $ulanguage);
+                    if ($translated_child_id) {
+                        // Set the parent to be the translated parent
+                        update_post_meta($translated_child_id, $meta_key,
+                                        $parent_post_id);
+                    }
+                }
+            }
+        }
+
+        add_filter('get_post_metadata', 'wpcf_pr_meta_belongs_filter', 10, 4);
+    }
 }

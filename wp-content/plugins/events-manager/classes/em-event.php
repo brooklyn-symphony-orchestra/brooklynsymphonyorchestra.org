@@ -10,19 +10,19 @@ function em_get_event($id = false, $search_by = 'event_id') {
 	//check if it's not already global so we don't instantiate again
 	if( is_object($EM_Event) && get_class($EM_Event) == 'EM_Event' ){
 		if( is_object($id) && $EM_Event->post_id == $id->ID ){
-			return $EM_Event;
+			return apply_filters('em_get_event', $EM_Event);
 		}elseif( !is_object($id) ){
 			if( $search_by == 'event_id' && $EM_Event->event_id == $id ){
-				return $EM_Event;
+				return apply_filters('em_get_event', $EM_Event);
 			}elseif( $search_by == 'post_id' && $EM_Event->post_id == $id ){
-				return $EM_Event;
+				return apply_filters('em_get_event', $EM_Event);
 			}
 		}
 	}
 	if( is_object($id) && get_class($id) == 'EM_Event' ){
-		return $id;
+		return apply_filters('em_get_event', $id);
 	}else{
-		return new EM_Event($id,$search_by);
+		return apply_filters('em_get_event', new EM_Event($id,$search_by));
 	}
 }
 /**
@@ -265,22 +265,27 @@ class EM_Event extends EM_Object{
 	
 	function load_postdata($event_post, $search_by = false){
 		if( is_object($event_post) ){
+			//load post data - regardless
+			$this->post_id = $event_post->ID;
+			$this->event_name = $event_post->post_title;
+			$this->event_owner = $event_post->post_author;
+			$this->post_content = $event_post->post_content;
+			$this->event_slug = $event_post->post_name;
+			$this->event_modified = $event_post->post_modified;
+			foreach( $event_post as $key => $value ){ //merge post object into this object
+				$this->$key = $value;
+			}
+			$this->previous_status = $this->event_status; //so we know about updates
+			$this->recurrence = $this->is_recurring() ? 1:0;
+			//load meta data and other related information
 			if( $event_post->post_status != 'auto-draft' ){
-				if( is_numeric($search_by) && is_multisite() ){
-					// if in multisite mode, switch blogs quickly to get the right post meta.
-					switch_to_blog($search_by);
-					$event_meta = get_post_custom($event_post->ID);
-					restore_current_blog();
-					$this->blog_id = $search_by;
-				}else{
-					$event_meta = get_post_custom($event_post->ID);
-				}
+			    $event_meta = $this->get_event_meta($search_by);
 				//Get custom fields and post meta
 				foreach($event_meta as $event_meta_key => $event_meta_val){
+					$field_name = substr($event_meta_key, 1);
 					if($event_meta_key[0] != '_'){
 						$this->event_attributes[$event_meta_key] = ( count($event_meta_val) > 1 ) ? $event_meta_val:$event_meta_val[0];					
-					}elseif($event_meta_key != '_event_attributes'){
-						$field_name = substr($event_meta_key, 1);
+					}elseif( !in_array($field_name, $this->post_fields) ){
 						if( array_key_exists($field_name, $this->fields) ){
 							$this->$field_name = $event_meta_val[0];
 						}elseif( in_array($field_name, array('event_owner_name','event_owner_anonymous','event_owner_email')) ){
@@ -308,21 +313,22 @@ class EM_Event extends EM_Object{
 					}
 				}
 			}
-			//load post data - regardless
-			$this->post_id = $event_post->ID;
-			$this->event_name = $event_post->post_title;
-			$this->event_owner = $event_post->post_author;
-			$this->post_content = $event_post->post_content;
-			$this->event_slug = $event_post->post_name;
-			$this->event_modified = $event_post->post_modified;
-			foreach( $event_post as $key => $value ){ //merge post object into this object
-				$this->$key = $value;
-			}
-			$this->previous_status = $this->event_status; //so we know about updates
-			$this->recurrence = $this->is_recurring() ? 1:0;
 			$this->get_status();
 			$this->compat_keys();
 		}
+	}
+	
+	function get_event_meta($blog_id = false){
+		if( is_numeric($blog_id) && $blog_id > 0 && is_multisite() ){
+			// if in multisite mode, switch blogs quickly to get the right post meta.
+			switch_to_blog($blog_id);
+			$event_meta = get_post_meta($this->post_id);
+			restore_current_blog();
+			$this->blog_id = $blog_id;
+		}else{
+			$event_meta = get_post_meta($this->post_id);
+		}
+		return $event_meta;
 	}
 	
 	/**
@@ -340,8 +346,8 @@ class EM_Event extends EM_Object{
 		//anonymous submissions and guest basic info
 		if( !is_user_logged_in() && get_option('dbem_events_anonymous_submissions') && empty($this->event_id) ){
 			$this->event_owner_anonymous = 1;
-			$this->event_owner_name = !empty($_POST['event_owner_name']) ? stripslashes($_POST['event_owner_name']):'';
-			$this->event_owner_email = !empty($_POST['event_owner_email']) ? $_POST['event_owner_email']:'';
+			$this->event_owner_name = !empty($_POST['event_owner_name']) ? wp_kses_data(stripslashes($_POST['event_owner_name'])):'';
+			$this->event_owner_email = !empty($_POST['event_owner_email']) ? wp_kses_data($_POST['event_owner_email']):'';
 		}
 		//get the rest and validate (optional)
 		$this->get_post_meta(false);
@@ -356,8 +362,8 @@ class EM_Event extends EM_Object{
 	 */
 	function get_post_meta($validate = true){
 		//Grab POST data	
-		$this->event_start_date = ( !empty($_POST['event_start_date']) ) ? $_POST['event_start_date'] : '';
-		$this->event_end_date = ( !empty($_POST['event_end_date']) ) ? $_POST['event_end_date'] : $this->event_start_date;
+		$this->event_start_date = ( !empty($_POST['event_start_date']) ) ? wp_kses_data($_POST['event_start_date']) : '';
+		$this->event_end_date = ( !empty($_POST['event_end_date']) ) ? wp_kses_data($_POST['event_end_date']) : $this->event_start_date;
 		//check if this is recurring or not
 		if( !empty($_POST['recurring']) ){
 			$this->recurrence = 1;
@@ -402,7 +408,7 @@ class EM_Event extends EM_Object{
 			$this->event_rsvp = 1;
 			//RSVP cuttoff TIME is set up above where start/end times are as well 
 			if( !$this->is_recurring() ){
-				$this->event_rsvp_date = ( isset($_POST['event_rsvp_date']) ) ? $_POST['event_rsvp_date'] : $this->event_start_date;
+				$this->event_rsvp_date = ( isset($_POST['event_rsvp_date']) ) ? wp_kses_data($_POST['event_rsvp_date']) : $this->event_start_date;
 				if( empty($this->event_rsvp_date) ){ $this->event_rsvp_time = '00:00:00'; }
 			}
 			$this->event_spaces = ( isset($_POST['event_spaces']) ) ? absint($_POST['event_spaces']):0;
@@ -445,10 +451,10 @@ class EM_Event extends EM_Object{
 			if( !empty($_POST['recurrence_bydays']) && $this->recurrence_freq == 'weekly' && self::array_is_numeric($_POST['recurrence_bydays']) ){
 				$this->recurrence_byday = implode( ",", $_POST['recurrence_bydays'] );
 			}elseif( !empty($_POST['recurrence_byday']) && $this->recurrence_freq == 'monthly' ){
-				$this->recurrence_byday = $_POST['recurrence_byday'];
+				$this->recurrence_byday = wp_kses_data($_POST['recurrence_byday']);
 			}
 			$this->recurrence_interval = ( !empty($_POST['recurrence_interval']) && is_numeric($_POST['recurrence_interval']) ) ? $_POST['recurrence_interval']:1;
-			$this->recurrence_byweekno = ( !empty($_POST['recurrence_byweekno']) ) ? $_POST['recurrence_byweekno']:'';
+			$this->recurrence_byweekno = ( !empty($_POST['recurrence_byweekno']) ) ? wp_kses_data($_POST['recurrence_byweekno']):'';
 			$this->recurrence_days = ( !empty($_POST['recurrence_days']) && is_numeric($_POST['recurrence_days']) ) ? (int) $_POST['recurrence_days']:0;
 		}
 		//categories in MS GLobal
@@ -456,9 +462,8 @@ class EM_Event extends EM_Object{
 			$this->get_categories()->get_post(); //it'll know what to do
 		}
 		//validate (optional) and return result
-		$result = $validate ? $this->validate_meta():true;
 		$this->compat_keys(); //compatability
-		return apply_filters('em_event_get_post', $result, $this);
+		return apply_filters('em_event_get_post', count($this->errors) == 0, $this);
 	}
 	
 	function validate(){
@@ -476,9 +481,10 @@ class EM_Event extends EM_Object{
 				$this->add_error( sprintf(__("%s is required.", "dbem"), __('Your name','dbem')) );
 			}
 		}
+		$validate_tickets = $this->get_bookings()->get_tickets()->validate();
 		$validate_image = $this->image_validate();
 		$validate_meta = $this->validate_meta();
-		return apply_filters('em_event_validate', $validate_post && $validate_image && $validate_meta, $this );		
+		return apply_filters('em_event_validate', $validate_post && $validate_image && $validate_meta && $validate_tickets, $this );		
 	}
 	function validate_meta(){
 		$missing_fields = Array ();
@@ -575,7 +581,9 @@ class EM_Event extends EM_Object{
 			$this->post_status = $post_data->post_status;
 			$this->get_status();
 			//Categories? note that categories will soft-fail, so no errors
-			$this->get_categories()->save();
+			$this->get_categories()->event_id = $this->event_id;
+			$this->categories->post_id = $this->post_id;
+			$this->categories->save();
 			//anonymous submissions should save this information
 			if( !empty($this->event_owner_anonymous) ){
 				update_post_meta($this->post_id, '_event_owner_anonymous', 1);
@@ -609,7 +617,6 @@ class EM_Event extends EM_Object{
 			do_action('em_event_save_meta_pre', $this);
 			//first save location
 			if( empty($this->location_id) && !($this->location_id === 0 && !get_option('dbem_require_location',true)) ){
-				if( get_site_option('dbem_ms_mainblog_locations') ){ $this->ms_global_switch(); }
 				if( !$this->get_location()->save() ){ //soft fail
 					global $EM_Notices;
 					if( !empty($this->get_location()->location_id) ){
@@ -619,7 +626,6 @@ class EM_Event extends EM_Object{
 						$EM_Notices->add_error( __('There were some errors saving your location.'), true);
 					}
 				}
-				if( get_site_option('dbem_ms_mainblog_locations') ){ $this->ms_global_switch_back(); }
 				if( !empty($this->location->location_id) ){ //only case we don't use get_location(), since it will fail as location has an id, whereas location_id isn't set in this object
 					$this->location_id = $this->location->location_id;
 				}
@@ -725,31 +731,40 @@ class EM_Event extends EM_Object{
 		//First, duplicate.
 		if( $this->can_manage('edit_events','edit_others_events') ){
 			$EM_Event = clone $this;
+			$EM_Event->get_categories(); //before we remove event/post ids
+			$EM_Event->get_bookings()->get_tickets(); //in case this wasn't loaded and before we reset ids
 			$EM_Event->event_id = null;
-			//Duplicate Post
-			$fields = $wpdb->get_col("DESCRIBE ".$wpdb->posts);
-			unset($fields[0]);
-			$fields = implode(',',$fields);
-			$sql = "INSERT INTO {$wpdb->posts} ($fields) SELECT $fields FROM {$wpdb->posts} WHERE ID={$this->post_id}";
-			$result = $wpdb->query($sql);
-			//TODO make a post_id refresher function to change all post ids in objects this contains
-			$EM_Event->post_id = $EM_Event->get_categories()->post_id = $EM_Event->ID = $wpdb->insert_id;
-			$EM_Event->get_categories()->save();
-			//Duplicate Event Table index and tickets
-			if( $EM_Event->save_meta() ){
-				//duplicate tickets
-				$EM_Tickets = $this->get_bookings()->get_tickets();
-				foreach($EM_Tickets->tickets as $EM_Ticket){
-					$EM_Ticket->ticket_id = '';
-					$EM_Ticket->event_id = $EM_Event->event_id;
-					$EM_Ticket->save();
-				}
-				$EM_Event->get_bookings(true); //refresh booking tickets
+			$EM_Event->post_id = null;
+			$EM_Event->ID = null;
+			$EM_Event->post_name = '';
+			$EM_Event->location_id = (empty($EM_Event->location_id)  && !get_option('dbem_require_location')) ? 0:$EM_Event->location_id;
+			$EM_Event->get_bookings()->event_id = null;
+			$EM_Event->get_bookings()->get_tickets()->event_id = null;
+			//if bookings reset ticket ids and duplicate tickets
+			foreach($EM_Event->get_bookings()->get_tickets()->tickets as $EM_Ticket){
+				$EM_Ticket->ticket_id = null;
+				$EM_Ticket->event_id = null;
+			}
+			do_action('em_event_duplicate_pre', $EM_Event);
+			if( $EM_Event->save() ){
 				$EM_Event->feedback_message = sprintf(__("%s successfully duplicated.", 'dbem'), __('Event','dbem'));
-			 	//featured images
-			 	$featured_image = get_post_meta( $this->post_id, '_thumbnail_id', true );
-			 	if( !empty($featured_image) ){
-			 		$wpdb->query('INSERT INTO '.$wpdb->postmeta." (post_id, meta_key, meta_value) VALUES ({$EM_Event->post_id}, '_thumbnail_id', {$featured_image})");
+			 	//other non-EM post meta inc. featured image
+				$event_meta = $this->get_event_meta($this->blog_id);
+				$event_meta_inserts = array();
+			 	//Get custom fields and post meta - adapted from $this->load_post_meta()
+			 	foreach($event_meta as $event_meta_key => $event_meta_vals){
+			 		if($event_meta_key[0] == '_'){
+			 		    $field_name = substr($event_meta_key, 1);
+			 			if($field_name != 'event_attributes' && !array_key_exists($field_name, $this->fields) && !in_array($field_name, array('edit_last', 'edit_lock', 'event_owner_name','event_owner_anonymous','event_owner_email')) ){
+				 			foreach($event_meta_vals as $event_meta_val){
+				 			    $event_meta_inserts[] = "({$EM_Event->post_id}, '{$event_meta_key}', '{$event_meta_val}')";
+				 			}
+			 			}
+			 		}
+			 	}
+			 	//save in one SQL statement
+			 	if( !empty($event_meta_inserts) ){
+			 		$wpdb->query('INSERT INTO '.$wpdb->postmeta." (post_id, meta_key, meta_value) VALUES ".implode(', ', $event_meta_inserts));
 			 	}
 				return apply_filters('em_event_duplicate', $EM_Event, $this);
 			}
@@ -765,21 +780,25 @@ class EM_Event extends EM_Object{
 	function delete($force_delete = false){ //atm wp seems to force cp deletions anyway
 		global $wpdb;
 		if( $this->can_manage('delete_events', 'delete_others_events') ){
-			remove_action('before_delete_post',array('EM_Event_Post_Admin','before_delete_post'),10,1); //since we're deleting directly, remove post actions
-			do_action('em_event_delete_pre', $this);
+		    if( !is_admin() ){
+				include_once('em-event-post-admin.php');
+				if( !defined('EM_EVENT_DELETE_INCLUDE') ){
+					EM_Event_Post_Admin::init();
+					EM_Event_Recurring_Post_Admin::init();
+					define('EM_EVENT_DELETE_INCLUDE',true);
+				}
+		    }
+		    do_action('em_event_delete_pre', $this);
 			if( $force_delete ){
 				$result = wp_delete_post($this->post_id,$force_delete);
-				$result_meta = $this->delete_meta();
 			}else{
 				$result = wp_trash_post($this->post_id);
-				$result_meta = true;
-				$this->set_status(null); //FIXME status isn't set on trash post, maybe bug/nuance in WP when not admin side?
 			}
 		}else{
-			$result = $result_meta = false;
+			$result = false;
 		}
 		//print_r($result); echo "|"; print_r($result_meta); die('DELETING');
-		return apply_filters('em_event_delete', $result !== false && $result_meta, $this);
+		return apply_filters('em_event_delete', $result !== false, $this);
 	}
 	
 	function delete_meta(){
@@ -980,6 +999,22 @@ class EM_Event extends EM_Object{
 		return $this->get_bookings()->get_spaces($force_refresh);
 	}
 	
+	/* 
+	 * Extends the default EM_Object function by switching blogs as needed if in MS Global mode  
+	 * @param string $size
+	 * @return string
+	 * @see EM_Object::get_image_url()
+	 */
+	function get_image_url($size = 'full'){
+	    if( EM_MS_GLOBAL && get_current_blog_id() != $this->blog_id ){
+	        switch_to_blog($this->blog_id);
+	        $switch_back = true;
+	    }
+		$return = parent::get_image_url($size);
+		if( !empty($switch_back) ){ restore_current_blog(); }
+		return $return;
+	}
+	
 	function get_edit_reschedule_url(){
 		if( $this->is_recurrence() ){
 			$EM_Event = em_get_event($this->recurrence_id);
@@ -1048,11 +1083,14 @@ class EM_Event extends EM_Object{
 		}
 	}
 	
-	function is_free(){
+	function is_free( $now = false ){
 		$free = true;
 		foreach($this->get_tickets() as $EM_Ticket){
+		    /* @var $EM_Ticket EM_Ticket */
 			if( $EM_Ticket->get_price() > 0 ){
-				$free = false;
+				if( !$now || $EM_Ticket->is_available() ){	
+				    $free = false;
+				}
 			}
 		}
 		return apply_filters('em_event_is_free',$free,$this);
@@ -1159,6 +1197,12 @@ class EM_Event extends EM_Object{
 					}elseif ($condition == 'fully_booked'){
 						//is it an all day event
 						$show_condition = $this->event_rsvp && $this->get_bookings()->get_available_spaces() <= 0;
+					}elseif ($condition == 'is_free' || $condition == 'is_free_now'){
+						//is it a free day event, if _now then free right now
+						$show_condition = !$this->event_rsvp || $this->is_free( $condition == 'is_free_now' );
+					}elseif ($condition == 'not_free' || $condition == 'not_free_now'){
+						//is it a paid event, if _now then paid right now
+						$show_condition = $this->event_rsvp && !$this->is_free( $condition == 'not_free_now' );
 					}elseif ($condition == 'is_long'){
 						//is it an all day event
 						$show_condition = $this->event_start_date != $this->event_end_date;
@@ -1171,6 +1215,18 @@ class EM_Event extends EM_Object{
 					}elseif ($condition == 'is_future'){
 						//if event is upcoming
 						$show_condition = $this->start > current_time('timestamp');
+					}elseif ($condition == 'is_recurrence'){
+						//if event is a recurrence
+						$show_condition = $this->is_recurrence();
+					}elseif ($condition == 'not_recurrence'){
+						//if event is not a recurrence
+						$show_condition = !$this->is_recurrence();
+					}elseif ($condition == 'is_private'){
+						//if event is a recurrence
+						$show_condition = $this->event_private == 1;
+					}elseif ($condition == 'not_private'){
+						//if event is not a recurrence
+						$show_condition = $this->event_private == 0;
 					}elseif ( preg_match('/^has_category_([a-zA-Z0-9_\-]+)$/', $condition, $category_match)){
 					    //event is in this category
 					    $show_condition = has_term($category_match[1], EM_TAXONOMY_CATEGORY, $this->post_id);
@@ -1184,6 +1240,7 @@ class EM_Event extends EM_Object{
 					   //event doesn't have this tag
 					    $show_condition = !has_term($tag_match[1], EM_TAXONOMY_TAG, $this->post_id);
 					}
+					//other potential ones - has_attribute_... no_attribute_... has_categories_...
 					$show_condition = apply_filters('em_event_output_show_condition', $show_condition, $condition, $conditionals[0][$key], $this);
 					if($show_condition){
 						//calculate lengths to delete placeholders
@@ -1241,14 +1298,24 @@ class EM_Event extends EM_Object{
 								$image_size = explode(',', $placeholders[3][$key]);
 								$image_src = $this->image_url;
 								if( $this->array_is_numeric($image_size) && count($image_size) > 1 ){
-									global $blog_id;
-									if ( is_multisite() && $blog_id > 0) {
-										$imageParts = explode('/blogs.dir/', $image_src);
-										if (isset($imageParts[1])) {
-											$image_src = network_site_url('/wp-content/blogs.dir/'. $blog_id. '/' . $imageParts[1]);
+								    //get a thumbnail
+								    if( get_option('dbem_disable_timthumb') ){
+									    if( EM_MS_GLOBAL && get_current_blog_id() != $this->blog_id ){
+									        switch_to_blog($this->blog_id);
+									        $switch_back = true;
+									    }
+										$replace = get_the_post_thumbnail($this->ID, $image_size);
+										if( !empty($switch_back) ){ restore_current_blog(); }
+								    }else{
+										if ( is_multisite() ) { //get the direct url as timthumb doesn't support redirect urls
+											global $blog_id;
+											$imageParts = explode('/blogs.dir/', $image_src);
+											if (isset($imageParts[1])) {
+												$image_src = network_site_url('/wp-content/blogs.dir/'. $imageParts[1]);
+											}
 										}
-									}
-									$replace = "<img src='".esc_url(em_get_thumbnail_url($image_src, $image_size[0], $image_size[1]))."' alt='".esc_attr($this->event_name)."'/>";
+									    $replace = "<img src='".esc_url(em_get_thumbnail_url($image_src, $image_size[0], $image_size[1]))."' alt='".esc_attr($this->event_name)."' width='{$image_size[0]}' height='{$image_size[1]}'/>";
+								    }
 								}else{
 									$replace = "<img src='".esc_url($image_src)."' alt='".esc_attr($this->event_name)."'/>";
 								}
@@ -1306,7 +1373,7 @@ class EM_Event extends EM_Object{
 					if( $this->can_manage('edit_events','edit_others_events') ){
 						$link = esc_url($this->get_edit_url());
 						if( $result == '#_EDITEVENTLINK'){
-							$replace = '<a href="'.$link.'">'.esc_html(sprintf(__('Edit %s','dbem'),__('Event','dbem'))).'</a>';
+							$replace = '<a href="'.$link.'">'.esc_html(sprintf(__('Edit Event','dbem'))).'</a>';
 						}else{
 							$replace = $link;
 						}
@@ -1319,26 +1386,7 @@ class EM_Event extends EM_Object{
 					if( get_option('dbem_rsvp_enabled')){
 						ob_start();
 						$template = em_locate_template('placeholders/bookingform.php', true, array('EM_Event'=>$this));
-						if( !defined('EM_BOOKING_JS_LOADED') ){
-							//this kicks off the Javascript required by booking forms. This is fired once for all booking forms on a page load and appears at the bottom of the page
-							//your theme must call the wp_footer() function for this to work (as required by many other plugins too) 
-							function em_booking_js_footer(){
-								?>		
-								<script type="text/javascript">
-									jQuery(document).ready( function($){	
-										<?php
-											//we call the segmented JS files and include them here
-											include(WP_PLUGIN_DIR.'/events-manager/includes/js/bookingsform.js'); 
-											do_action('em_gateway_js'); 
-										?>							
-									});
-								</script>
-								<?php
-							}
-							add_action('wp_footer','em_booking_js_footer');
-							add_action('admin_footer','em_booking_js_footer');
-							define('EM_BOOKING_JS_LOADED',true);
-						}
+						EM_Bookings::enqueue_js();
 						$replace = ob_get_clean();
 					}
 					break;
@@ -1349,17 +1397,24 @@ class EM_Event extends EM_Object{
 						$replace = ob_get_clean();
 					}
 					break;
+				case '#_EVENTPRICERANGEALL':				    
+				    $show_all_ticket_prices = true; //continues below
 				case '#_EVENTPRICERANGE':
 					//get the range of prices
 					$min = false;
 					$max = 0;
-					foreach( $this->get_tickets()->tickets as $EM_Ticket ){
-						if($EM_Ticket->get_price() > $max ){
-							$max = $EM_Ticket->get_price();
+					if( $this->get_bookings()->is_open() || $show_all_ticket_prices ){
+						foreach( $this->get_tickets()->tickets as $EM_Ticket ){
+							/* @var $EM_Ticket EM_Ticket */
+							if( $EM_Ticket->is_available() || get_option('dbem_bookings_tickets_show_unavailable') || !empty($show_all_ticket_prices) ){
+								if($EM_Ticket->get_price() > $max ){
+									$max = $EM_Ticket->get_price();
+								}
+								if($EM_Ticket->get_price() < $min || $min === false){
+									$min = $EM_Ticket->get_price();
+								}						
+							}
 						}
-						if($EM_Ticket->get_price() < $min || $min === false){
-							$min = $EM_Ticket->get_price();
-						}						
 					}
 					if( $min === false ) $min = 0;
 					if( $min != $max ){
@@ -1372,8 +1427,11 @@ class EM_Event extends EM_Object{
 					//get the range of prices
 					$min = false;
 					foreach( $this->get_tickets()->tickets as $EM_Ticket ){
-						if( $EM_Ticket->get_price() < $min || $min === false){
-							$min = $EM_Ticket->get_price();
+						/* @var $EM_Ticket EM_Ticket */
+						if( $EM_Ticket->is_available()|| get_option('dbem_bookings_tickets_show_unavailable') ){
+							if( $EM_Ticket->get_price() < $min || $min === false){
+								$min = $EM_Ticket->get_price();
+							}
 						}
 					}
 					if( $min === false ) $min = 0;
@@ -1383,9 +1441,12 @@ class EM_Event extends EM_Object{
 					//get the range of prices
 					$max = 0;
 					foreach( $this->get_tickets()->tickets as $EM_Ticket ){
-						if( $EM_Ticket->get_price() > $max ){
-							$max = $EM_Ticket->get_price();
-						}						
+						/* @var $EM_Ticket EM_Ticket */
+						if( $EM_Ticket->is_available()|| get_option('dbem_bookings_tickets_show_unavailable') ){
+							if( $EM_Ticket->get_price() > $max ){
+								$max = $EM_Ticket->get_price();
+							}
+						}			
 					}
 					$replace = em_get_currency_formatted($max);
 					break;
@@ -1476,6 +1537,11 @@ class EM_Event extends EM_Object{
 					$template = em_locate_template('placeholders/attendeeslist.php', true, array('EM_Event'=>$this));
 					$replace = ob_get_clean();
 					break;
+				case '#_ATTENDEESPENDINGLIST':
+					ob_start();
+					$template = em_locate_template('placeholders/attendeespendinglist.php', true, array('EM_Event'=>$this));
+					$replace = ob_get_clean();
+					break;
 				//Categories and Tags
 				case '#_EVENTCATEGORIESIMAGES':
 					ob_start();
@@ -1527,8 +1593,8 @@ class EM_Event extends EM_Object{
 						$gcal_url_description = wp_kses_data($matches[0]);
 					}
 					$gcal_url_length = strlen($gcal_url) - 9;
-					if( strlen($gcal_url_description) + $gcal_url_length > 1500 ){
-						$gcal_url_description = substr($gcal_url_description, 0, 1530 - $gcal_url_length - 3 ).'...';
+					if( strlen($gcal_url_description) + $gcal_url_length > 1350 ){
+						$gcal_url_description = substr($gcal_url_description, 0, 1380 - $gcal_url_length - 3 ).'...';
 					}
 					$gcal_url = str_replace('post_content', urlencode($gcal_url_description), $gcal_url);
 					//get the final url
@@ -1548,7 +1614,11 @@ class EM_Event extends EM_Object{
 		//sort out replacements so that during replacements shorter placeholders don't overwrite longer varieties.
 		krsort($replaces);
 		foreach($replaces as $full_result => $replacement){
-			$event_string = str_replace($full_result, $replacement , $event_string );
+			if( !in_array($full_result, array('#_NOTES','#_EVENTNOTES')) ){
+				$event_string = str_replace($full_result, $replacement , $event_string );
+			}else{
+				$desc_replace[$full_result] = $replacement;
+			}
 		}
 		//Time placeholders
 		foreach($placeholders[1] as $result) {
@@ -1581,6 +1651,13 @@ class EM_Event extends EM_Object{
 		
 		if( empty($EM_Category) ) $EM_Category = new EM_Category();
 		$event_string = $EM_Category->output($event_string, $target);
+		
+		//Finally, do the event notes, so that previous placeholders don't get replaced within the content, which may use shortcodes
+		if( !empty($desc_replace) ){
+			foreach($desc_replace as $full_result => $replacement){
+				$event_string = str_replace($full_result, $replacement , $event_string );
+			}
+		}
 		
 		return apply_filters('em_event_output', $event_string, $this, $format, $target);
 	}	
@@ -1711,19 +1788,18 @@ class EM_Event extends EM_Object{
 				$recurring_date_format = apply_filters('em_event_save_events_format', 'Y-m-d');
 				foreach( $matching_days as $day ) {
 					//rewrite post fields if needed
-					$post_fields['post_name'] = $event['event_slug'] = $meta_fields['_event_slug'] = $post_name.'-'.date($recurring_date_format, $day);
+					$post_fields['post_name'] = $event['event_slug'] = $meta_fields['_event_slug'] = apply_filters('em_event_save_events_slug', $post_name.'-'.date($recurring_date_format, $day), $post_fields, $day, $matching_days, $this);
 					//adjust certain meta information
 					$event['event_start_date'] = $meta_fields['_event_start_date'] = date("Y-m-d", $day);
-					$meta_fields['_start_ts'] = $day;
+					$meta_fields['_start_ts'] = strtotime($event['event_start_date'].' '.$event['event_start_time']);
 					$event['event_rsvp_date'] = $meta_fields['_event_rsvp_date'] = $event['event_start_date'];
 					$event['event_rsvp_time'] = $meta_fields['_event_rsvp_time'] = $event['event_start_time'];
 					if($this->recurrence_days > 0){
-						$meta_fields['_end_ts'] = $day + ($this->recurrence_days * 60*60*24);
-						$event['event_end_date'] = $meta_fields['_event_end_date'] = date("Y-m-d", $meta_fields['_end_ts']);
+						$event['event_end_date'] = $meta_fields['_event_end_date'] = date("Y-m-d", $meta_fields['_start_ts'] + ($this->recurrence_days * 60*60*24));
 					}else{
-						$meta_fields['_end_ts'] = $day;
 						$event['event_end_date'] = $meta_fields['_event_end_date'] = $event['event_start_date'];
 					}	
+					$meta_fields['_end_ts'] = strtotime($event['event_end_date'].' '.$event['event_end_time']);
 					//create the event
 					if( $wpdb->insert($wpdb->posts, $post_fields ) ){
 						$event['post_id'] = $meta_fields['_post_id'] = $post_id = $post_ids[] = $wpdb->insert_id; //post id saved into event and also as a var for later user
@@ -1986,10 +2062,10 @@ class EM_Event extends EM_Object{
 			foreach($weekday_array as $day){
 				array_push($natural_days, $weekdays_name[$day]);
 			}
-			$output .= implode(" and ", $natural_days);
-			$freq_desc = ", " . __("every week", 'dbem');
+			$output .= implode(", ", $natural_days);
+			$freq_desc = " " . __("every week", 'dbem');
 			if ($EM_Event_Recurring->recurrence_interval > 1 ) {
-				$freq_desc = ", ".sprintf (__("every %s weeks", 'dbem'), $EM_Event_Recurring->recurrence_interval);
+				$freq_desc = " ".sprintf (__("every %s weeks", 'dbem'), $EM_Event_Recurring->recurrence_interval);
 			}
 			
 		}elseif ($EM_Event_Recurring->recurrence_freq == 'monthly')  {
@@ -2040,11 +2116,11 @@ class EM_Event extends EM_Object{
  */
 function em_event_output_placeholder($result,$event,$placeholder,$target='html'){
 	if( $target == 'raw' ) return $result;
-	if( ($placeholder == "#_EXCERPT" || $placeholder == "#_LOCATIONEXCERPT") && $target == 'html' ){
+	if( in_array($placeholder, array("#_EXCERPT",'#_EVENTEXCERPT', "#_LOCATIONEXCERPT")) && $target == 'html' ){
 		$result = apply_filters('dbem_notes_excerpt', $result);
 	}elseif( $placeholder == '#_CONTACTEMAIL' && $target == 'html' ){
 		$result = em_ascii_encode($event->get_contact()->user_email);
-	}elseif( in_array($placeholder, array('#_EVENTNOTES','#_NOTES','#_DESCRIPTION','#_LOCATIONNOTES','#_CATEGORYNOTES')) ){
+	}elseif( in_array($placeholder, array('#_EVENTNOTES','#_NOTES','#_DESCRIPTION','#_LOCATIONNOTES','#_CATEGORYNOTES','#_CATEGORYDESCRIPTION')) ){
 		if($target == 'rss'){
 			$result = apply_filters('dbem_notes_rss', $result);
 			$result = apply_filters('the_content_rss', $result);
@@ -2058,7 +2134,7 @@ function em_event_output_placeholder($result,$event,$placeholder,$target='html')
 			$result = apply_filters('dbem_notes', $result);
 		}
 	}elseif( in_array($placeholder, array("#_NAME",'#_LOCATION','#_TOWN','#_ADDRESS','#_LOCATIONNAME',"#_EVENTNAME","#_LOCATIONNAME")) ){
-		if ($target == "rss"){    
+		if ($target == "rss"){
 			$result = apply_filters('dbem_general_rss', $result);
 	  	}elseif ($target == "ical"){    
 			$result = apply_filters('dbem_general_ical', $result); 
@@ -2084,6 +2160,7 @@ add_filter('dbem_notes', 'convert_smilies');
 add_filter('dbem_notes', 'convert_chars');
 add_filter('dbem_notes', 'wpautop');
 add_filter('dbem_notes', 'prepend_attachment');
+add_filter('dbem_notes', 'do_shortcode');
 // RSS content filter
 add_filter('dbem_notes_rss', 'convert_chars', 8);
 add_filter('dbem_general_rss', 'esc_html', 8);

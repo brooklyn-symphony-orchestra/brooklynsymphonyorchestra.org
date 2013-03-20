@@ -64,6 +64,7 @@
 	border-left: 1px solid #C7DBE2;
 	border-image: initial;}
 #mash-email-subscribe .mash-email-box input.email{
+
 	background:#FFFFFF;
 	border: 1px solid #dedede;
 	color: #000;
@@ -88,13 +89,16 @@
 	-webkit-border-radius:3px;
 	border:1px solid #cc7c00;
 	color:#000;
-	text-shadow:#d08d00 1px 1px 0;
 	padding:7px 14px;
-	margin-left:3px;
 	font-weight:bold;
 	font-size:12px;
 	cursor:pointer;
-	border-image: initial;}
+	border-image: initial;
+	
+    width: 100%;
+    margin: 6px 0;
+
+	}
 #mash-email-subscribe .mash-email-box input.subscribe:hover{
 	background: #ff9b00;
 	background-image:-moz-linear-gradient(top,#ffda4d,#ff9b00);
@@ -110,8 +114,7 @@
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
 	border:1px solid #cc7c00;
-	color:#000;
-	text-shadow:#d08d00 1px 1px 0}	
+	color:#000;}	
 #mash-other-social {
 	background-color: #D8E6EB;
 	box-shadow: 0 1px 1px #FFFFFF inset;

@@ -11,6 +11,7 @@ class EM_Event_Post {
 		if( !is_admin() ){
 			//override single page with formats? 
 			add_filter('the_content', array('EM_Event_Post','the_content'));
+			add_filter('the_excerpt_rss', array('EM_Event_Post','the_excerpt_rss'));
 			//display as page template?
 			if( get_option('dbem_cp_events_template_page') ){
 				add_filter('single_template',array('EM_Event_Post','single_template'));
@@ -48,6 +49,18 @@ class EM_Event_Post {
 		return $template;
 	}
 	
+	function the_excerpt_rss( $content ){
+		global $post, $EM_Event;
+		if( $post->post_type == EM_POST_TYPE_EVENT ){
+			if( get_option('dbem_cp_events_formats') ){
+				$EM_Event = em_get_event($post);
+				$content = $EM_Event->output( get_option ( 'dbem_rss_description_format' ), "rss");
+				$content = ent2ncr(convert_chars($content)); //Some RSS filtering
+			}
+		}
+		return $content;
+	}
+	
 	function the_content( $content ){
 		global $post, $EM_Event;
 		if( $post->post_type == EM_POST_TYPE_EVENT ){
@@ -62,7 +75,7 @@ class EM_Event_Post {
 					ob_start();
 					em_locate_template('templates/event-single.php',true);
 					$content = ob_get_clean();
-				}else{
+				}elseif( !post_password_required() ){
 					$EM_Event = em_get_event($post);
 					if( $EM_Event->event_rsvp ){
 					    $content .= $EM_Event->output('<h2>Bookings</h2>#_BOOKINGFORM');
@@ -140,8 +153,8 @@ class EM_Event_Post {
 		return $thelist;
 	}
 	
-	function parse_query( ){
-		global $wp_query;
+	function parse_query(){
+	    global $wp_query;
 		//Search Query Filtering
 		if( !is_admin() ){
 			if( !empty($wp_query->query_vars['s']) && !get_option('dbem_cp_events_search_results') ){

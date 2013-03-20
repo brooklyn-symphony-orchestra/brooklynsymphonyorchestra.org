@@ -166,13 +166,13 @@ jQuery(document).ready( function($){
 					//sort out dates and localization masking
 					var start_pub = $("#em-tickets-form input[name=ticket_start_pub]").val();
 					var end_pub = $("#em-tickets-form input[name=ticket_end_pub]").val();
-					$('#em-tickets-form *[name]').attr('value','');
+					$('#em-tickets-form *[name]').attr('value','').removeAttr('checked');
 					$('#em-tickets-form .close').trigger('click');
 					$(this).dialog('close');
 				}
 			}]
 		});
-		$("#em-tickets-add").click(function(e){ e.preventDefault(); $('#em-tickets-form *[name]').attr('value',''); $("#em-tickets-form").dialog('open'); });
+		$("#em-tickets-add").click(function(e){ e.preventDefault(); $('#em-tickets-form *[name]').attr('value','').removeAttr('checked'); $("#em-tickets-form").dialog('open'); });
 		//Edit a Ticket
 		$(document).delegate('.ticket-actions-edit', 'click', function(e){
 			//trigger click
@@ -180,11 +180,17 @@ jQuery(document).ready( function($){
 			$('#em-tickets-add').trigger('click');
 			//populate form
 			var rowId = $(this).parents('tr').first().attr('id');
-			$('#em-tickets-form *[name]').attr('value','');
+			$('#em-tickets-form *[name]').attr('value','').removeAttr('checked');
 			$.each( $('#'+rowId+' *[name]'), function(index,el){
 				var el = $(el);
 				var selector = el.attr('class');
-				$('#em-tickets-form *[name='+selector+']').attr('value',el.attr('value'));
+				var input_field = $('#em-tickets-form *[name='+selector+']');
+				if( input_field.attr('type') == 'checkbox' ){
+					if( el.val() == 1 ){ input_field.attr('checked','checked'); }
+					else{ input_field.removeAttr('checked'); }
+				}else{
+					input_field.attr('value',el.attr('value'));	
+				}
 			});
 			$("#em-tickets-form input[name=prev_slot]").attr('value',rowId); //save the current slot number
 			//refresh datepicker and values
@@ -494,11 +500,14 @@ jQuery(document).ready( function($){
 	$("#localised-date").show();
 	$("#localised-end-date").show();
 	
-	$('input.select-all').change(function(){
-	 	if($(this).is(':checked'))
-	 	$('input.row-selector').attr('checked', true);
-	 	else
-	 	$('input.row-selector').attr('checked', false);
+	$('#em-wrapper input.select-all').change(function(){
+	 	if($(this).is(':checked')){
+			$('input.row-selector').attr('checked', true);
+			$('input.select-all').attr('checked', true);
+	 	}else{
+			$('input.row-selector').attr('checked', false);
+			$('input.select-all').attr('checked', false);
+		}
 	}); 
 	
 	updateIntervalDescriptor(); 
@@ -521,7 +530,7 @@ jQuery(document).ready( function($){
 	
 	//Finally, add autocomplete here
 	//Autocomplete
-	if( jQuery( "#em-location-data input#location-name, " ).length > 0 ){
+	if( jQuery( "#em-location-data input#location-name" ).length > 0 ){
 		jQuery( "#em-location-data input#location-name" ).autocomplete({
 			source: EM.locationajaxurl,
 			minLength: 2,
@@ -591,7 +600,7 @@ function em_setup_datepicker(wrap){
 		dateDivs.find('input.em-date-input-loc').each(function(i,dateInput){
 			//init the datepicker
 			var dateInput = jQuery(dateInput);
-			var dateValue = dateInput.next('input.em-date-input');
+			var dateValue = dateInput.nextAll('input.em-date-input').first();
 			var dateValue_value = dateValue.val();
 			dateInput.datepicker(datepicker_vals);
 			dateInput.datepicker('option', 'altField', dateValue);
@@ -604,7 +613,7 @@ function em_setup_datepicker(wrap){
 			//add logic for texts
 			dateInput.change(function(){
 				if( jQuery(this).val() == '' ){
-					jQuery(this).next('.em-date-input').val('');
+					jQuery(this).nextAll('.em-date-input').first().val('');
 				}
 			});
 		});
@@ -662,7 +671,7 @@ function em_setup_timepicker(wrap){
 		var end = jQuery(this);
 		var start = end.prevAll('.em-time-start');
 		if( start.val() ){
-			if(jQuery.timePicker(start).getTime() > jQuery.timePicker(this).getTime()) { end.addClass("error"); }
+			if( jQuery.timePicker(start).getTime() > jQuery.timePicker(this).getTime() && ( jQuery('.em-date-end').val().length == 0 || jQuery('.em-date-start').val() == jQuery('.em-date-end').val() ) ) { end.addClass("error"); }
 			else { end.removeClass("error"); }
 		}
 	});
@@ -758,7 +767,7 @@ function em_maps() {
 				  var bounds = new google.maps.LatLngBounds(minLatLng,maxLatLng);
 				  maps[map_id].fitBounds(bounds);
 				//Call a hook if exists
-				jQuery(document).triggerHandler('em_maps_locations_hook', [maps[map_id]]);
+				jQuery(document).triggerHandler('em_maps_locations_hook', [maps[map_id]], data);
 			}else{
 				el.children().first().html('No locations found');
 			}
@@ -795,6 +804,59 @@ function em_maps() {
 			}
 		}
 		
+		//Add listeners for changes to address
+		var get_map_by_id = function(id){
+			if(jQuery('#em-map').length > 0){
+				jQuery.getJSON(document.URL,{ em_ajax_action:'get_location', id:id }, function(data){
+					if( data.location_latitude!=0 && data.location_longitude!=0 ){
+						loc_latlng = new google.maps.LatLng(data.location_latitude, data.location_longitude);
+						marker.setPosition(loc_latlng);
+						marker.setTitle( data.location_name );
+						marker.setDraggable(false);
+						jQuery('#em-map').show();
+						jQuery('#em-map-404').hide();
+						map.setCenter(loc_latlng);
+						map.panBy(40,-55);
+						infoWindow.setContent( '<div id="location-balloon-content">'+ data.location_balloon +'</div>');
+						infoWindow.open(map, marker);
+						google.maps.event.trigger(map, 'resize');
+					}else{
+						jQuery('#em-map').hide();
+						jQuery('#em-map-404').show();
+					}
+				});
+			}
+		}
+		jQuery('#location-select-id, input#location-id').change( function(){get_map_by_id(jQuery(this).val())} );
+		jQuery('#location-name, #location-town, #location-address, #location-state, #location-postcode, #location-country').change( function(){
+			//build address
+			var addresses = [ jQuery('#location-address').val(), jQuery('#location-town').val(), jQuery('#location-state').val(), jQuery('#location-postcode').val() ];
+			var address = '';
+			jQuery.each( addresses, function(i, val){
+				if( val != '' ){
+					address = ( address == '' ) ? address+val:address+', '+val;
+				}
+			});
+			if( address == '' ){ //in case only name is entered, no address
+				jQuery('#em-map').hide();
+				jQuery('#em-map-404').show();
+				return false;
+			}
+			//do country last, as it's using the text version
+			if( jQuery('#location-country option:selected').val() != 0 ){
+				address = ( address == '' ) ? address+jQuery('#location-country option:selected').text():address+', '+jQuery('#location-country option:selected').text();
+			}
+			if( address != '' && jQuery('#em-map').length > 0 ){
+				geocoder.geocode( { 'address': address }, function(results, status) {
+				    if (status == google.maps.GeocoderStatus.OK) {
+						jQuery('#location-latitude').val(results[0].geometry.location.lat());
+						jQuery('#location-longitude').val(results[0].geometry.location.lng());
+					}
+				    refresh_map_location();
+				});
+			}
+		});
+		
 		//Load map
 		if(jQuery('#em-map').length > 0){
 			var em_LatLng = new google.maps.LatLng(0, 0);
@@ -824,56 +886,12 @@ function em_maps() {
 				map.setCenter(position);
 				map.panBy(40,-55);
 			});
-		    refresh_map_location();
-		}
-		
-		//Add listeners for changes to address
-		var get_map_by_id = function(id){
-			if(jQuery('#em-map').length > 0){
-				jQuery.getJSON(document.URL,{ em_ajax_action:'get_location', id:id }, function(data){
-					if( data.location_latitude!=0 && data.location_longitude!=0 ){
-						loc_latlng = new google.maps.LatLng(data.location_latitude, data.location_longitude);
-						marker.setPosition(loc_latlng);
-						marker.setTitle( data.location_name );
-						marker.setDraggable(false);
-						jQuery('#em-map').show();
-						jQuery('#em-map-404').hide();
-						map.setCenter(loc_latlng);
-						map.panBy(40,-55);
-						infoWindow.setContent( '<div id="location-balloon-content">'+ data.location_balloon +'</div>');
-						infoWindow.open(map, marker);
-						google.maps.event.trigger(map, 'resize');
-					}else{
-						jQuery('#em-map').hide();
-						jQuery('#em-map-404').show();
-					}
-				});
+			if( jQuery('#location-select-id').length > 0 ){
+				jQuery('#location-select-id').trigger('change');
+			}else{
+				refresh_map_location();
 			}
 		}
-		jQuery('#location-select-id, input#location-id').change( function(){get_map_by_id(jQuery(this).val())} );
-		jQuery('#location-town, #location-address, #location-state, #location-postcode, #location-country').change( function(){
-			//build address
-			var addresses = [ jQuery('#location-address').val(), jQuery('#location-town').val(), jQuery('#location-state').val(), jQuery('#location-postcode').val() ];
-			var address = '';
-			jQuery.each( addresses, function(i, val){
-				if( val != '' ){
-					address = ( address == '' ) ? address+val:address+', '+val;
-				}
-			});
-			//do country last, as it's using the text version
-			if( jQuery('#location-country option:selected').val() != 0 ){
-				address = ( address == '' ) ? address+jQuery('#location-country option:selected').text():address+', '+jQuery('#location-country option:selected').text();
-			}
-			if( address != '' && jQuery('#em-map').length > 0 ){
-				geocoder.geocode( { 'address': address }, function(results, status) {
-				    if (status == google.maps.GeocoderStatus.OK) {
-						jQuery('#location-latitude').val(results[0].geometry.location.lat());
-						jQuery('#location-longitude').val(results[0].geometry.location.lng());
-					}
-				    refresh_map_location();
-				});
-			}
-		});
 	}
 }
   

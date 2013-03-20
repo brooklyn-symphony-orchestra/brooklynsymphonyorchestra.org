@@ -90,6 +90,7 @@ class EM_Locations extends EM_Object implements Iterator {
 		
 		if( EM_MS_GLOBAL ){
 			foreach ( $results as $location ){
+			    if( empty($location['blog_id']) ) $location['blog_id'] = get_current_site()->blog_id;
 				$locations[] = em_get_location($location['post_id'], $location['blog_id']);
 			}
 		}else{
@@ -146,9 +147,7 @@ class EM_Locations extends EM_Object implements Iterator {
 			//Add headers and footers to output
 			if( $format == get_option ( 'dbem_location_list_item_format' ) ){
 				$single_event_format_header = get_option ( 'dbem_location_list_item_format_header' );
-				$single_event_format_header = ( $single_event_format_header != '' ) ? $single_event_format_header : "<ul class='em-locations-list'>";
 				$single_event_format_footer = get_option ( 'dbem_location_list_item_format_footer' );
-				$single_event_format_footer = ( $single_event_format_footer != '' ) ? $single_event_format_footer : "</ul>";
 				$output =  $single_event_format_header .  $output . $single_event_format_footer;
 			}
 			//Pagination (if needed/requested)
@@ -167,9 +166,12 @@ class EM_Locations extends EM_Object implements Iterator {
 	}
 	
 	function delete( $args = array() ){
-		if( !is_object(current($args)) && get_class((current($args))) != 'EM_Location' ){
+	    $locations = array();
+		if( !is_object(current($args)) ){
+		    //we've been given an array or search arguments to find the relevant locations to delete
 			$locations = self::get($args);
-		}else{
+		}elseif( get_class(current($args)) == 'EM_Location' ){
+		    //we're deleting an array of locations
 			$locations = $args;
 		}
 		$results = array();
@@ -203,12 +205,20 @@ class EM_Locations extends EM_Object implements Iterator {
 			$conditions['owner'] = 'location_owner='.get_current_user_id();
 		}
 		//blog id in events table
-		if( EM_MS_GLOBAL && !empty($args['blog']) && is_numeric($args['blog']) ){
-			if( is_main_site($args['blog']) ){
-				$conditions['blog'] = "($locations_table.blog_id={$args['blog']} OR $locations_table.blog_id IS NULL)";
-			}else{
-				$conditions['blog'] = "($locations_table.blog_id={$args['blog']})";
-			}
+		if( EM_MS_GLOBAL && !empty($args['blog']) ){
+		    if( is_numeric($args['blog']) ){
+				if( is_main_site($args['blog']) ){
+					$conditions['blog'] = "(".$locations_table.".blog_id={$args['blog']} OR ".$locations_table.".blog_id IS NULL)";
+				}else{
+					$conditions['blog'] = "(".$locations_table.".blog_id={$args['blog']})";
+				}
+		    }else{
+		        if( !is_array($args['blog']) && preg_match('/^([\-0-9],?)+$/', $args['blog']) ){
+		            $conditions['blog'] = "(".$locations_table.".blog_id IN ({$args['blog']}) )";
+			    }elseif( is_array($args['blog']) && $this->array_is_numeric($args['blog']) ){
+			        $conditions['blog'] = "(".$locations_table.".blog_id IN (".implode(',',$args['blog']).") )";
+			    }
+		    }
 		}
 		//status
 		if( array_key_exists('status',$args) && is_numeric($args['status']) ){
@@ -257,14 +267,13 @@ class EM_Locations extends EM_Object implements Iterator {
 			'status' => 1, //approved locations only
 			'scope' => 'all', //we probably want to search all locations by default, not like events
 			'blog' => get_current_blog_id(),
-			'private' => !current_user_can('read_private_locations'),
+			'private' => current_user_can('read_private_locations'),
 			'private_only' => false,
 			'post_id' => false
 		);
-		if( EM_MS_GLOBAL && !is_admin() ){
-			if( empty($array['blog']) && is_main_site() && get_site_option('dbem_ms_global_locations') ){
-			    $array['blog'] = false;
-			}
+		if( EM_MS_GLOBAL && get_site_option('dbem_ms_mainblog_locations') ){
+		    //when searching in MS Global mode with all locations being stored on the main blog, blog_id becomes redundant as locations are stored in one blog table set
+		    $array['blog'] = false;
 		}
 		$array['eventful'] = ( !empty($array['eventful']) && $array['eventful'] == true );
 		$array['eventless'] = ( !empty($array['eventless']) && $array['eventless'] == true );

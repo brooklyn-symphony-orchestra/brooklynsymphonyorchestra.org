@@ -99,6 +99,7 @@ global $EM_Event, $post;
 								<input type="hidden" class="ticket_min" name="em_tickets[<?php echo $count; ?>][ticket_min]" value="<?php echo $EM_Ticket->ticket_min ?>" />
 								<input type="hidden" class="ticket_max" name="em_tickets[<?php echo $count; ?>][ticket_max]" value="<?php echo $EM_Ticket->ticket_max ?>" />
 								<input type="hidden" class="ticket_members" name="em_tickets[<?php echo $count; ?>][ticket_members]" value="<?php echo $EM_Ticket->ticket_members ?>" />
+								<input type="hidden" class="ticket_required" name="em_tickets[<?php echo $count; ?>][ticket_required]" value="<?php echo $EM_Ticket->ticket_required ?>" />
 								<?php do_action('em_event_edit_ticket_hidden', $EM_Ticket); ?>
 							</td>
 						</tr>
@@ -114,7 +115,7 @@ global $EM_Event, $post;
 	<?php } ?>
 	<p>
 		<label><strong><?php _e('Total Spaces','dbem'); ?></strong></label>
-		<input type="text" name="event_spaces" value="<?php echo $EM_Event->event_spaces; ?>" /><br />
+		<input type="text" name="event_spaces" value="<?php if( $EM_Event->event_spaces > 0 ){ echo $EM_Event->event_spaces; } ?>" /><br />
 		<em><?php _e('Individual tickets with remaining spaces will not be available if total booking spaces reach this limit. Leave blank for no limit.','dbem'); ?></em>
 	</p>
 	<?php if( !$EM_Event->is_recurring() ): ?>

@@ -4,7 +4,7 @@
  * Plugin URI: http://www.qurl.nl/dynamic-widgets/
  * Description: Dynamic Widgets gives you full control on which pages your widgets will appear. It lets you dynamicly show or hide widgets on WordPress pages.
  * Author: Qurl
- * Version: 1.5.2
+ * Version: 1.5.4
  * Author URI: http://www.qurl.nl/
  * Tags: widget, widgets, dynamic, sidebar, custom, rules, logic, admin, condition, conditional tags, hide, show, wpml, qtranslate, wpec, buddypress, pods
  *
@@ -15,7 +15,7 @@
  *
  * Released under the GPL v.2, http://www.gnu.org/copyleft/gpl.html
  *
- * @version $Id: dynamic-widgets.php 532982 2012-04-18 17:35:12Z qurl $
+ * @version $Id: dynamic-widgets.php 639724 2012-12-15 16:23:24Z qurl $
  * @copyright 2011 Jacco Drabbe
  *
  * Thanks to Alexis Nomine for the contribution of the French (fr_FR) language files, several L10N fixes and change of the edit options UI.
@@ -24,6 +24,11 @@
  * Thanks to Hanolex for the contribution of the Chinese (Simplified) (zh_CN) language files.
  * Thanks to Liudas Ališauskas for the contribution of the Lithuanian (lt_LT) language files.
  * Thanks to Pedro Nave for the contribution of the Portuguese (pt_PT) language files.
+ * Thanks to Renato Tavares for the contribution of the Brazil Portuguese (pt_BR) language files.
+ * Thanks to Pavel Bilek for the contribution of the Chech (cs_CZ) language files.
+ * Thanks to Morten Nalholm for the contribution of the Danish (da_DK) language files.
+ * Thanks to Scott Kingsley Clark for the help to get the Pods module upgraded to support Pods v2.
+ *
  *
  * WPML Plugin support via API
  * Using constants	ICL_PLUGIN_PATH > mods/wpml_module.php
@@ -45,7 +50,7 @@
  *
  * BP Plugin support
  * Using constants	BP_VERSION > mods/bp_module.php
- * User vars				$bp > mods/bp_module.php
+ * Using vars				$bp > mods/bp_module.php
  *
  * Pods Plugin support
  * Using constants 	PODS_VERSION_FULL > mods/pods_module.php
@@ -66,9 +71,9 @@
   define('DW_MODULES', dirname(__FILE__) . '/' . 'mods/');
   define('DW_PLUGIN', dirname(__FILE__) . '/' . 'plugin/');
   define('DW_TIME_LIMIT', 86400);				// 1 day
-  define('DW_URL', 'http://www.qurl.nl');
-  define('DW_VERSION', '1.5.2');
-  define('DW_VERSION_URL_CHECK', DW_URL . '/wp-content/uploads/php/dw_version.php?v=' . DW_VERSION . '&n=');
+  define('DW_URL_AUTHOR', 'http://www.qurl.nl');
+  define('DW_VERSION', '1.5.4');
+  define('DW_VERSION_URL_CHECK', DW_URL_AUTHOR . '/wp-content/uploads/php/dw_version.php?v=' . DW_VERSION . '&n=');
 	define('DW_WPML_API', '/inc/wpml-api.php');			// WPML Plugin support - API file relative to ICL_PLUGIN_PATH
 	define('DW_WPML_ICON', 'img/wpml_icon.png');	// WPML Plugin support - WPML icon
 
@@ -88,7 +93,7 @@
 
 		$query = "CREATE TABLE IF NOT EXISTS " . $dbtable . " (
                 id int(11) NOT NULL auto_increment,
-                widget_id varchar(40) NOT NULL,
+                widget_id varchar(60) NOT NULL,
                 maintype varchar(50) NOT NULL,
                 `name` varchar(40) NOT NULL,
                 `value` longtext NOT NULL,
@@ -146,10 +151,35 @@
 					$wpdb->query($query);
 				}
 			}
+			
+			/*
+			1.5.3.1 > Widgets seems to be started using longer classnames to avoid clashing.
+			Widend up the width for widget_id from 40 to 60.
+			*/
+			if ( version_compare($version, '1.5.3.1', '<') ) {
+				$query = "ALTER TABLE " . $dbtable . " CHANGE `widget_id` `widget_id` VARCHAR(60) NOT NULL";
+				$wpdb->query($query);
+			}
 
 		}
 		update_option('dynwid_version', DW_VERSION);
 	}
+
+	/**
+   * dynwid_add_admin_custom_box Adds meta boxes to Custom Post Types
+   * @since 1.5.2.5
+   */
+	function dynwid_add_admin_custom_box() {
+		$args = array(
+							'public'   => TRUE,
+							'_builtin' => FALSE
+						);
+
+		$post_types = get_post_types($args, 'objects', 'and');
+		foreach ( array_keys($post_types) as $type ) {
+			add_meta_box('dynwid', __('Dynamic Widgets', DW_L10N_DOMAIN), 'dynwid_add_post_control', $type, 'side', 'low');
+		}
+  }
 
 	/**
    * dynwid_add_admin_help_tab() Add help tab for WP >= 3.3
@@ -236,10 +266,10 @@
   	wp_enqueue_script('jquery-ui-core');
   	if ( version_compare(substr($GLOBALS['wp_version'], 0, 3), '3.1', '>=') ) {
   		wp_enqueue_script('jquery-ui-widget');
-  		wp_enqueue_script('jquery-ui-accordion', $DW->plugin_url . 'ui.accordion.1.8.7.js', array('jquery-ui-widget'));
+  		// wp_enqueue_script('jquery-ui-accordion', $DW->plugin_url . 'ui.accordion.1.8.7.js', array('jquery-ui-widget'));
   		wp_enqueue_script('jquery-ui-datepicker', $DW->plugin_url . 'ui.datepicker.1.8.7.js', array('jquery-ui-widget'));
   	} else {
-  		wp_enqueue_script('jquery-ui-accordion', $DW->plugin_url . 'ui.accordion.1.7.3.js', array('jquery-ui-core'));
+  		//  wp_enqueue_script('jquery-ui-accordion', $DW->plugin_url . 'ui.accordion.1.7.3.js', array('jquery-ui-core'));
   		wp_enqueue_script('jquery-ui-datepicker', $DW->plugin_url . 'ui.datepicker.1.7.3.js', array('jquery-ui-core'));
   	}
 	}
@@ -279,19 +309,27 @@
     $post = $GLOBALS['post'];
     $DW = &$GLOBALS['DW'];
 
+    $post_type = get_post_type($post->ID);
+    if ( $post_type == 'post') {
+    	$post_type = 'single';
+    	$maintype = 'single-post';
+    } else {
+    	$maintype = $post_type . '-post';
+  	}
+
     $opt = $DW->getOpt('%','individual');
     echo '<strong>' . __('Apply exception rule to widgets:', DW_L10N_DOMAIN) . '</strong><br /><br />';
     foreach ( $opt as $widget ) {
       $single_condition = '1';
       $checked = '';
-      $opt_single = $DW->getOpt($widget->widget_id, 'single');
+      $opt_single = $DW->getOpt($widget->widget_id, $post_type);
 
       // loop through the opts to see if we have a match
       foreach ( $opt_single as $widget_opt ) {
         if ( $widget_opt->maintype == 'single' ) {
           $single_condition = $widget_opt->value;
         }
-        if ( $widget_opt->maintype == 'single-post' && $widget_opt->name == $post->ID ) {
+        if ( $widget_opt->maintype == $maintype && $widget_opt->name == $post->ID ) {
           $checked = ' checked="checked"';
         }
       }
@@ -381,25 +419,6 @@
     if ( isset($_GET['dynwid_save']) && $_GET['dynwid_save'] == 'yes' ) {
       add_action('sidebar_admin_page', 'dynwid_add_widget_page');
     }
-
-  	// Saving state of hide title checkbox -> maybe use filter "widget_update_callback"
-  	/* if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
-  		$dw_hide_title = get_option('dw_hide_title');
-  		if ( $dw_hide_title === FALSE ) {
-  			$dw_hide_title = array();
-  		}
-  		$widget_id = $_POST['widget-id'];
-
-  		$var = 'dw_hide_title_' . $widget_id;
-  		if ( isset($_POST[$var])  && $_POST[$var] == 'on' && ! in_array($widget_id, $dw_hide_title) ) {
-  			$dw_hide_title[ ] = $widget_id;
-  		} else if (! isset($_POST[$var]) && in_array($widget_id, $dw_hide_title) ) {
-  			$key = array_search($widget_id, $dw_hide_title);
-  			unset($dw_hide_title[$key]);
-  		}
-
-  		update_option('dw_hide_title', $dw_hide_title);
-  	} */
   }
 
   /**
@@ -551,7 +570,7 @@
   		echo '<div class="error" id="message"><p>';
   		_e('<b>ERROR</b> Your host is running a too low version of PHP. Dynamic Widgets needs at least version', DW_L10N_DOMAIN);
   		echo ' ' . DW_MINIMUM_PHP . '.';
-  		echo '<br />See <a href="' . DW_URL . '/question/my-hoster-is-still-using-php4-so-what/">this page</a> why.';
+  		echo '<br />See <a href="' . DW_URL_AUTHOR . '/question/my-hoster-is-still-using-php4-so-what/">this page</a> why.';
   		echo '</p></div>';
   	}
 
@@ -609,6 +628,7 @@
   			add_action('admin_menu', 'dynwid_add_admin_menu');
 
   			if ( $DW->enabled ) {
+  				add_action('add_meta_boxes', 'dynwid_add_admin_custom_box');
   				add_action('edit_tag_form_fields', 'dynwid_add_tag_page');
   				add_action('edited_term', 'dynwid_save_tagdata');
   				add_action('in_plugin_update_message-' . plugin_basename(__FILE__), 'dynwid_check_version', 10, 2);
@@ -651,39 +671,53 @@
 	 */
 	function dynwid_save_postdata($post_id) {
 	  $DW = &$GLOBALS['DW'];
+	  
+	  if ( $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] != 'autosave' ) {
+	  	$post_id = ( isset($_POST['post_ID']) && ! empty($_POST['post_ID']) ) ? intval($_POST['post_ID']) : 0;
+	  	
+	  	if ( $parent_id = wp_is_post_revision($post_id) ) {
+				$post_id = $parent_id;
+			}
 
-    // Using parent post_id to prevent cluttering up the database with revision numbers
-	  if ( array_key_exists('post_ID', $_POST) ) {
-	    $post_id = $_POST['post_ID'];
-	  }
-
-	  // Housekeeping
-	  $opt = $DW->getOpt('%','individual');
-	  foreach ( $opt as $widget ) {
-	    $DW->deleteOption($widget->widget_id, 'single-post', $post_id);
-	  }
-
-	  if ( array_key_exists('dw-single-post', $_POST) ) {
-	    $opt = $_POST['dw-single-post'];
-	    $default = 'yes';
-	    $default_single = '1';
-
-	    foreach ( $opt as $widget_id ) {
-	      $opt_single = $DW->getOpt($widget_id, 'single');
-	      if ( count($opt_single) > 0 ) {
-	        foreach ( $opt_single as $widget ) {
-	          if ( $widget->maintype == 'single' ) {
-	            $default_single = $widget->value;
-	          }
-	        }
-
-	        if ( $default_single == '0' ) {
-	          $default = 'no';
-	        }
-	      }
-	      $DW->addMultiOption($widget_id, 'single-post', $default, array($post_id));
-	    }
-	  } // END if array_key_exists
+			if ( $post_id > 0 ) {
+				$post_type = get_post_type($post_id);
+				if ( $post_type == 'post') {
+					$post_type = 'single';
+					$maintype = 'single-post';
+				} else {
+					$maintype = $post_type . '-post';
+				}
+		
+			  // Housekeeping
+			  $opt = $DW->getOpt('%','individual');
+			  foreach ( $opt as $widget ) {
+			    $DW->deleteOption($widget->widget_id, $maintype, $post_id);
+			  }
+		
+			  if ( array_key_exists('dw-single-post', $_POST) ) {
+			    $opt = $_POST['dw-single-post'];
+			    $default = 'yes';
+			    $default_single = '1';
+		
+			    foreach ( $opt as $widget_id ) {
+			      $opt_single = $DW->getOpt($widget_id, $post_type);
+			      if ( count($opt_single) > 0 ) {
+			        foreach ( $opt_single as $widget ) {
+			          if ( $widget->maintype == $post_type ) {
+			            $default_single = $widget->value;
+			          }
+			        }
+		
+			        if ( $default_single == '0' ) {
+			          $default = 'no';
+			        }
+			      }
+		
+			      $DW->addMultiOption($widget_id, $maintype, $default, array($post_id));
+			    }
+			  } // END if array_key_exists
+			} // END if $post_id > 0 
+		} // END if ! autosave AND ! quick edit
 	}
 
 	/**
@@ -790,18 +824,10 @@
 	  $widget_id = $args[0]['widget_id'];
 	  $wp_callback = $DW->registered_widget_controls[$widget_id]['wp_callback'];
 
-		// Hide title option
-/*		$dw_hide_title = get_option('dw_hide_title');
-		$checked = FALSE;
-		if ( in_array($widget_id, $dw_hide_title) ) {
-			$checked = TRUE;
-		} */
-
 	  // Calling original callback first
     call_user_func_array($wp_callback, $args);
 
 	  // Now adding the dynwid text & link
-		// echo '<p><input id="dw_hide_title_' . str_replace('-', '_', $widget_id) . '" type="checkbox" name="dw_hide_title_' . $widget_id . '" ' . ( ($checked ? ' checked="checked"' : '' ) ) . ' /> <label for="dw_hide_title_' . str_replace('-', '_', $widget_id) . '">Hide the title</label></p>';
 	  echo '<p>' . __('Dynamic Widgets', DW_L10N_DOMAIN) . ': ';
 
 		if ( array_key_exists($widget_id, $DW->registered_widgets) ) {
