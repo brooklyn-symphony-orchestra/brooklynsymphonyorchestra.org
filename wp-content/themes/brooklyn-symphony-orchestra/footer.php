@@ -13,13 +13,15 @@
 
 		          <div id="bottomfooter">
 					<div class="row">
-						<div class="span2">
+						<div class="span12">
+						<?php bones_footer_links(); // Adjust using Menus in Wordpress Admin ?>
+						</div>
+					</div>
+					<div class="row">
+						<div class="span12">
 							<img src="<?php bloginfo('url');?>/wp-content/uploads/2012/08/logo-footer.jpg">
 							<p class="attribution"> &copy; <?php bloginfo('name'); ?></p>
 							<p class="pull-left"><a href="http://awkale.me" target="_blank" title="Alex W. Kale">Website by Alex Kale</a></p>
-						</div>
-						<div class="span10">
-						<?php bones_footer_links(); // Adjust using Menus in Wordpress Admin ?>
 						</div>
 					</div>
 
