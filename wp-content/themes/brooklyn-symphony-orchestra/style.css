@@ -159,24 +159,32 @@ h5 {
 	text-transform: uppercase;
 }
 .footer-links {
-	float: right;
+	float: left;
 	margin-top: 0;
 	margin-bottom: 30px;
 }
-.footer-links ul.menu > li {
-    margin-right: 30px;
+.footer-links ul.menu li {
+    margin-right: 15px;
+    padding-right: 15px;
     margin-left: 0;
     font-weight: bold;
+    border-right: 1px solid #787878;
 }
-.footer-links .menu li {
-	margin-left: 0;
+.footer-links ul.menu li:last-child {
+    border-right: none;
+}
+.footer-links ul.menu li a {
+	color: #787878;
+}
+.footer-links ul.menu li a:hover {
+	color: #3099E0;
 }
 .footer-links .menu li li {
 	font-weight: normal;
 }
 #bottomfooter {
 	background-color: #dddddd;
-	padding: 10px;
+	padding: 20px;
 	height: auto;
 }
 #bottomfooter img {
@@ -184,7 +192,7 @@ h5 {
 }
 p.attribution{
 	line-height: .75em;
-	font-size: .75em;
+	font-size: 14px;
 	margin: 10px 0;
 	float: left;
 	clear: both;
@@ -357,7 +365,7 @@ input, textarea {
 .home #main {
 	background-color: transparent;
 }
-.page-header, .post_content, .sidebar, #respond {
+.post_content, .single-post #content header, .category #content header, .sidebar, #respond, .archive_title {
 	padding: 0px 10px
 }
 #widget-footer .widget {
@@ -412,5 +420,15 @@ button a {
 	color: #fff;
 }
 #text-4 button {
-	margin-top: -70px;
+	margin-top: 0;
+}
+.home h2.artblog {
+	margin-top: 40px;
+}
+.home h2.artblog a {
+	color: #000000 ;
+	font-size: 1.5em;
+}
+h4.artblog a {
+	color: #000000;
 }
