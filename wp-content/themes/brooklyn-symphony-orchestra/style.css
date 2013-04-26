@@ -86,9 +86,11 @@ h1 {
 }
 .page-header h1  {
 	font-size: 48px;
+	padding-left: 10px;
 }
 .event h1 {
 	font-size: 36px;
+	padding-left: 10px;
 }
 h1 {
 	font-size: 36px;
