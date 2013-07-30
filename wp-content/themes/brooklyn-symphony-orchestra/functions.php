@@ -119,6 +119,11 @@ function my_post_image_html( $html, $post_id, $post_image_id ) {
 add_theme_support( 'custom-background' );
 
 
+function magic_remove_lead_paragraph($content) {
+    global $post;
+    return preg_replace('/<p([^>]+)?>/', '<p$1 class="something_else">', $content, 1);
+}
+add_filter('the_content', 'magic_remove_lead_paragraph');
 
 /*
 Style Format Options
