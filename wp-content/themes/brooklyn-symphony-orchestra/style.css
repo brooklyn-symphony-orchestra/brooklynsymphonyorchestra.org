@@ -119,6 +119,7 @@ h3.piece {
 	font-size: 22px;
 	color: #000000;
 	font-weight: normal;
+	margin-top: 0;
 }
 h4 {
 	font-size: 18px;
@@ -269,7 +270,12 @@ ul {
 div.simplesocialbuttons {
 	margin-top: 40px !important;
 }
-
+.footnote {
+	margin-top: 2em;
+}
+.page-id-1595 #main h4 {
+	margin-bottom: 3em;
+}
 
 /* !iPhone */
 @media (max-width: 767px) {
