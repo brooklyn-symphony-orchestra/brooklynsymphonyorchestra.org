@@ -92,15 +92,15 @@ class Custom_Editor_Styles {
 	 *
 	 * @return void
 	 */
-	public function enqueue_custom_styles() {
-		wp_enqueue_style(
-			'custom-editor-styles',
-			$this->plugin_url . '/custom-styles.css',
-			array(),
-			'1.1',
-			'all'
-		);
-	}
+	//public function enqueue_custom_styles() {
+	//	wp_enqueue_style(
+	//		'custom-editor-styles',
+	//		$this->plugin_url . '/custom-styles.css',
+	//		array(),
+	//		'1.1',
+	//		'all'
+	//	);
+	//}
 
 }
 
