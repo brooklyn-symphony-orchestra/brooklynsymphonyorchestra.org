@@ -49,7 +49,7 @@ filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#222222', endC
     padding-top: 30px;
 }
 p.homeintro {
-	font-size: 20px;
+	font-size: 30px;
 	line-height: 1.5em;
 	margin-bottom: 1.5em;
 }
@@ -59,7 +59,7 @@ p.homeintro {
 }
 .page-template-page-homepage-php .hero-unit, .blog .hero-unit {
 	padding: 30px;
-	font-size: 17px;
+	font-size: 23px;
 	font-family: "sommet-slab",serif;
 	font-style: italic;
 	line-height: 1.5em;
@@ -67,7 +67,7 @@ p.homeintro {
 }
 .hero-unit h1 {
 	text-transform: uppercase;
-	font-size: 4.15em;
+	font-size: 3em;
 	font-style: normal;
 	line-height: .8em;
 	margin-bottom: .25em;
@@ -277,29 +277,6 @@ div.simplesocialbuttons {
 	margin-bottom: 3em;
 }
 
-/* !iPhone */
-@media (max-width: 767px) {
-
-	.navbar .brand {
-    font-size: 18px;
-    }
-    .page-template-page-homepage-php .hero-unit, .blog .hero-unit {
-    font-size: 10px;
-    }
-	.hero-unit h1 {
-		font-size: 1.1em;
-	}
-    .footer-links ul.menu > li {
-    margin-right: 10px;
-    margin-left: 0;
-    font-weight: bold;
-    }
-    .em-location-map {
-	    width: 150px !important;
-    }
-
-}
-
 
 /* !iPad vertical */
 @media (max-width: 979px) {
@@ -315,6 +292,37 @@ div.simplesocialbuttons {
     }
 }
 
+@media only screen and (max-width: 959px) and (min-width: 768px) {
+
+}
+
+/* !iPhone */
+@media (max-width: 479px) {
+
+	.navbar .brand {
+    font-size: 18px;
+    }
+    .page-template-page-homepage-php .hero-unit, .blog .hero-unit {
+    font-size: 17px;
+    }
+	.hero-unit h1 {
+		font-size: 3.1em;
+	}
+    .footer-links ul.menu > li {
+    margin-right: 10px;
+    margin-left: 0;
+    font-weight: bold;
+    }
+    .em-location-map {
+	    width: 150px !important;
+    }
+    .smooth_slider {
+	    height: 118px;
+    }
+	p.homeintro {
+		font-size: 17px;
+	}
+}
 
 
 
