@@ -18,6 +18,15 @@ body {
 	display: none;
 }
 
+#login p#nav, #login p#backtoblog {
+	font-size: 12px;
+}
+.login h1 a {
+	background-image: 	url("img/bso_logo.jpg");
+	background-size: 72px 85px;
+	height: 100px;
+}
+
 /* !Navigation */
  .navbar-inner, .navbar .fill {
 background-color: #08C;
@@ -40,6 +49,9 @@ filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#222222', endC
 }
 .navbar .nav > li > a {
 	text-shadow: none;
+}
+.logged-in #menu-item-1710, .logged-in #menu-item-1691 {
+	display: none;
 }
 /* END NAVIGATION */
 .hero-unit {
@@ -369,7 +381,7 @@ div.simplesocialbuttons {
 	background:#fff;
 	clear:left;
 }
-input, textarea {
+#mc_signup_form input, #mc_signup_form textarea {
     width: 90%;
 }
 .hide {
