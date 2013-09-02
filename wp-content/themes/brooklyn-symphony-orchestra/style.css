@@ -477,8 +477,15 @@ h4.artblog a {
 div.crm-container .crm-section .content label {
 	margin-right: 14px;
 }
+.label, .badge {
+  color: #08C;
+  background-color: #ffffff;
+}
 .crm-container .label, .crm-container .badge {
-	background-color: #08C;
+	background-color: #ffffff;
+}
+.crm-container fieldset {
+  border-top: none;
 }
 .crm-container fieldset legend {
 	font-size: 24px;
@@ -495,6 +502,7 @@ div.crm-container .crm-section .content label {
 	font-weight: bold;
 	color: #08C;
 }
+
 .crm-container a.button, .crm-container a.button:link, .crm-container a.button:visited, .crm-container input.form-submit, #crm-container input[type="button"], #crm-container input.form-submit-inline, #crm-container .crm-button {
 	 display: inline-block;
   *display: inline;
@@ -505,7 +513,7 @@ div.crm-container .crm-section .content label {
   line-height: 20px;
   color: #333333;
   text-align: center;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+  text-shadow: none;
   vertical-align: middle;
   cursor: pointer;
   background-color: #f5f5f5;
@@ -527,9 +535,9 @@ div.crm-container .crm-section .content label {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe6e6e6', GradientType=0);
   filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
   *zoom: 1;
-  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-     -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
 
  color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -569,3 +577,14 @@ div.crm-container .crm-section .content label {
 }
 
 
+div#crm-container form .messages.help {
+  margin: 40px 350px 40px 0;
+}
+
+div#crm-container form .cms_user_help-section.messages.help {
+  margin-top: 0;
+}
+
+.membership_new_intro-section {
+  margin-bottom: 40px;
+}
