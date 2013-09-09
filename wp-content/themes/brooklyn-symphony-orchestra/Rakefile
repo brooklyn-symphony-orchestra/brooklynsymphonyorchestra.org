@@ -1,0 +1,28 @@
+load 'dbconfig.rb'
+
+desc 'dump database'
+task :exportdb do
+  puts "*** dumping the database ***"
+  system "#{@mysqlpath}/mysqldump -u root -proot --add-drop-table #{@dbname} > db/database.sql"
+  puts "*** replacing siteurl ***"
+  text = File.read("db/database.sql")
+  text.gsub!("#{@siteurl}", "XXXSITEURLXXX")
+  puts "*** saving database ***"
+  File.open("db/database.sql", "w") do |file| 
+    file.write(text) 
+  end
+end
+
+desc 'import database'
+task :importdb do
+  puts "*** replacing siteurl ***"
+  text = File.read("db/database.sql")
+  text.gsub!("XXXSITEURLXXX", "#{@siteurl}")
+  File.open("db/database.sql", "w") {|file| file.write(text) }
+  puts "*** importing the database ***"
+  system "#{@mysqlpath}/mysql -u root -proot #{@dbname} < db/database.sql"
+  text.gsub!("#{@siteurl}", "XXXSITEURLXXX")
+  File.open("db/database.sql", "w") do |file| 
+    file.write(text)
+  end
+end
