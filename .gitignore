@@ -27,3 +27,4 @@ wp-content/plugins/civicrm/civicrm.settings copy 2.php
 wp-content/plugins/civicrm/civicrm.settings copy.php
 
 wp-content/plugins/civicrm/civicrm.settings.php
+wp-content/plugins/civicrm/civicrm/bin/mailchimp_sync.php
