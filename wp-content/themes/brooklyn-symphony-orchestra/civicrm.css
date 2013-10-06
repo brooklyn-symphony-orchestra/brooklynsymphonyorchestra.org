@@ -831,17 +831,17 @@ div.crm-container label {
 }
 
 .crm-container .crm-form-block .crm-loading-element {
-  background-image: url("../i/loading-E6E6DC.gif");
+  background-image: url("img/loading-E6E6DC.gif");
 }
 
 .crm-container .crm-loading-element {
   padding-left: 30px;
   height: 30px;
-  background: transparent url("../i/loading.gif") no-repeat 0px 0px;
+  background: transparent url("img/loading.gif") no-repeat 0px 0px;
 }
 
 .crm-container div div.crm-msg-loading div.icon {
-  background: transparent url("../i/loading-2f2f2e.gif") no-repeat 0px 0px;
+  background: transparent url("img/loading-2f2f2e.gif") no-repeat 0px 0px;
 }
 
 /*
@@ -1435,11 +1435,11 @@ editor specific classes
 }
 
 #crm-container div.remaining {
-  background: url("../i/contribute/pcp_remain.gif");
+  background: url("img/contribute/pcp_remain.gif");
 }
 
 #crm-container div.achieved {
-  background: url("../i/contribute/pcp_achieve.gif");
+  background: url("img/contribute/pcp_achieve.gif");
 }
 
 #crm-container .honor_roll {
@@ -1459,14 +1459,14 @@ editor specific classes
 }
 
 #crm-container .thermometer-fill-wrapper {
-  background: transparent url("../i/contribute/pcp_remain.gif") repeat-y scroll left bottom;
+  background: transparent url("img/contribute/pcp_remain.gif") repeat-y scroll left bottom;
   height: 220px;
   position: relative;
   margin: 1em 0 1.5em 0;
 }
 
 #crm-container .thermometer-fill {
-  background: transparent url(../i/contribute/pcp_achieve.gif) repeat-y scroll 0 bottom;
+  background: transparent url(img/contribute/pcp_achieve.gif) repeat-y scroll 0 bottom;
   bottom: 0;
   left: 0;
   position: absolute;
@@ -1492,7 +1492,7 @@ editor specific classes
 }
 
 #crm-container .ui-draggable {
-  background: url("../i/draggable.png") no-repeat left 1px;
+  background: url("img/draggable.png") no-repeat left 1px;
   float: left;
   height: 16px;
   text-indent: -10000px;
@@ -1708,7 +1708,7 @@ editor specific classes
   z-index: 9999;
   position: absolute;
   border-bottom: 0px;
-  background: transparent url(../i/dropdown-pointer.gif) no-repeat scroll 150px 1px;
+  background: transparent url(img/dropdown-pointer.gif) no-repeat scroll 150px 1px;
   text-align: left;
   padding-top: 5px;
   margin: 0px;
@@ -1735,7 +1735,7 @@ editor specific classes
   cursor: pointer;
   position: relative;
   padding: 0px 14px 0 5px;
-  background: url("../i/TreePlus.gif") no-repeat right 1px;
+  background: url("img/TreePlus.gif") no-repeat right 1px;
   border-left: none;
   z-index: 2;
 }
@@ -1770,7 +1770,7 @@ editor specific classes
 
 /* class for text area resizer jquery plugin*/
 div.grippie {
-  background: #EEEEEE url('../i/grippie.png') no-repeat scroll center 2px;
+  background: #EEEEEE url('img/grippie.png') no-repeat scroll center 2px;
   border-color: #DDDDDD;
   border-style: solid;
   border-width: 0pt 1px 1px;
@@ -2285,7 +2285,7 @@ div.grippie {
 #crm-container input.form-submit-inline,
 #crm-container .crm-button {
   text-shadow: 0 1px 0 black;
-  background: #70716B url(../i/crm-button-bg.gif) repeat-x top left;
+  background: #70716B url(img/crm-button-bg.gif) repeat-x top left;
   color: #FFF;
   font-size: 12px;
   font-weight: normal;
@@ -2331,7 +2331,7 @@ div.grippie {
 }
 
 .crm-container .button .red {
-  background-image: url(../i/icons/jquery-ui-FFFFFF.png);
+  background-image: url(img/icons/jquery-ui-FFFFFF.png);
 }
 
 .crm-container a.button:active {
@@ -2386,7 +2386,7 @@ div.grippie {
   width: 124px;
 }
 #crm-contact-actions-list .icon {
-  background-image: url("../i/icons/jquery-ui-FFFFFF.png");
+  background-image: url("img/icons/jquery-ui-FFFFFF.png");
 }
 
 #crm-contact-actions-list .crm-contact_activities-list select {
@@ -2461,12 +2461,12 @@ div.grippie {
 }
 
 .crm-container .ui-icon {
-  background-image: url("../i/icons/jquery-ui-52534D.png")
+  background-image: url("img/icons/jquery-ui-52534D.png")
 }
 .crm-container .icon {
   height: 16px;
   width: 16px;
-  background: transparent url("../i/icons/jquery-ui-52534D.png") no-repeat top right;
+  background: transparent url("img/icons/jquery-ui-52534D.png") no-repeat top right;
   float: left;
   text-indent: -10000px;
 }
@@ -2478,11 +2478,11 @@ div.grippie {
 
 .crm-container .button .icon,
 .crm-container .crm-button .icon {
-  background-image: url("../i/icons/jquery-ui-FFFFFF.png");
+  background-image: url("img/icons/jquery-ui-FFFFFF.png");
 }
 .crm-container .button:hover .icon,
 .crm-container .crm-button:hover .icon {
-  background-image: url("../i/icons/jquery-ui-2786C2.png");
+  background-image: url("img/icons/jquery-ui-2786C2.png");
 }
 
 .crm-container .crm-button .icon {
@@ -2490,9 +2490,9 @@ div.grippie {
 }
 
 .crm-container .dark-icon {
-  background-image: url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-icons_222222_256x240.png")}
+  background-image: url("img/ui-icons_222222_256x240.png")}
 .crm-container .red-icon {
-  background-image: url("../i/icons/jquery-ui-8A1F11.png")}
+  background-image: url("img/icons/jquery-ui-8A1F11.png")}
 
 .crm-container .edit-icon {
   background-position: -66px -114px;
@@ -2516,14 +2516,14 @@ div.grippie {
   background-position: -129px -112px;
 }
 .crm-container .button:hover .delete-icon {
-  background-image: url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-icons_cd0a0a_256x240.png")!important;
+  background-image: url("img/ui-icons_cd0a0a_256x240.png")!important;
 }
 
 .crm-container .restore-icon {
-  background-position: 0px -66px;background-image: url("../i/icons/jquery-ui-91CE00.png");
+  background-position: 0px -66px;background-image: url("img/icons/jquery-ui-91CE00.png");
 }
 .crm-container .button:hover .restore-icon {
-  background-image: url("../i/icons/jquery-ui-91CE00.png");
+  background-image: url("img/icons/jquery-ui-91CE00.png");
 }
 
 .crm-container .vcard-icon {
@@ -2583,14 +2583,14 @@ div.grippie {
 
 #crm-container .geotag {
   padding: 2px 0 2px 20px !important;
-  background: url('../i/geotag_16.png') left center no-repeat;
+  background: url('img/geotag_16.png') left center no-repeat;
   font-size: .9em;
 }
 
 /* These .crm-icon classes use item_sprites.png */
 
 .crm-container .crm-icon {
-  background-image: url('../i/item_sprites.png');
+  background-image: url('img/item_sprites.png');
   margin: 2px 4px 0 0;
   text-indent: -10000px;
   /* for accessibility reason, put the name of the type/subtype in the icon div (it will be hidden and replaced by the icon) */
@@ -2650,7 +2650,7 @@ div.grippie {
 /* accordion styles */
 
 .crm-container .crm-accordion-header {
-  background-image: url("../i/TreeMinusWhite.gif");
+  background-image: url("img/TreeMinusWhite.gif");
   background-repeat: no-repeat;
   background-position: 2px center;
   cursor: pointer;
@@ -2665,7 +2665,7 @@ div.grippie {
 }
 
 .crm-container .collapsed .crm-accordion-header {
-  background-image: url("../i/TreePlusWhite.gif");
+  background-image: url("img/TreePlusWhite.gif");
 }
 
 .crm-container .collapsed .crm-accordion-body,
@@ -2676,7 +2676,7 @@ div.grippie {
 .crm-container .crm-accordion-inner .crm-accordion-header,
 .crm-container .crm-accordion-wrapper .crm-master-accordion-header,
 .crm-container .crm-collapsible .collapsible-title {
-  background-image: url("../i/TreeMinus.gif");
+  background-image: url("img/TreeMinus.gif");
   background-color: transparent;
   color: #3E3E3E;
 }
@@ -2684,7 +2684,7 @@ div.grippie {
 .crm-container .crm-accordion-inner.collapsed .crm-accordion-header,
 .crm-container .crm-accordion-wrapper.collapsed .crm-master-accordion-header,
 .crm-container .crm-collapsible.collapsed .collapsible-title {
-  background-image: url("../i/TreePlus.gif");
+  background-image: url("img/TreePlus.gif");
 }
 
 .crm-container .crm-accordion-wrapper .crm-master-accordion-header {
@@ -2775,7 +2775,7 @@ div.grippie {
 
 #civicrm-menu .ac_input,
 .crm-container .ac_input {
-  background: white url(../i/magnify.gif) no-repeat scroll right center;
+  background: white url(img/magnify.gif) no-repeat scroll right center;
   padding-right: 16px;
   /* so that text doesn't flow on top of icon */
 }
@@ -2804,7 +2804,7 @@ div.grippie {
 .crm-container a.helpicon,
 .crm-container .crm-master-accordion-header a.helpicon {
   background-color: #6177D5;
-  background-image: url("../i/icons/jquery-ui-F5F6F1.png");
+  background-image: url("img/icons/jquery-ui-F5F6F1.png");
   background-position: -50px -146px;
   border-radius: 6px;
   display: inline-block;
@@ -2817,12 +2817,12 @@ div.grippie {
 
 div.crm-accordion-header a.helpicon {
   background-color: #F5F6F1;
-  background-image: url(../i/icons/jquery-ui-2786C2.png);
+  background-image: url(img/icons/jquery-ui-2786C2.png);
 }
 
 div a.helpicon:hover,
 div a.helpicon:focus {
-  background-image: url(../i/icons/jquery-ui-91CE00.png);
+  background-image: url(img/icons/jquery-ui-91CE00.png);
   opacity: 1;
 }
 
@@ -2838,7 +2838,7 @@ div a.helpicon:focus {
   overflow: hidden;
   z-index: 1000;
   padding-bottom: 10px;
-  background: transparent url('../i/overlay-pointer.png') no-repeat bottom left;
+  background: transparent url('img/overlay-pointer.png') no-repeat bottom left;
   font-size: 12px;
   display: none;
 }
@@ -2846,7 +2846,7 @@ div a.helpicon:focus {
 .crm-container .crm-tooltip-down .crm-tooltip-wrapper {
   top: 20px;
   padding-top: 10px;
-  background: transparent url('../i/overlay-pointer.png') no-repeat top left;
+  background: transparent url('img/overlay-pointer.png') no-repeat top left;
   overflow: visible;
 }
 
@@ -2923,7 +2923,7 @@ div a.helpicon:focus {
 /* privacy icons */
 #crm-container div span.privacy-flag {
   background-repeat: no-repeat;
-  background-image: url("../i/stop-icon.png");
+  background-image: url("img/stop-icon.png");
   float: right;
 }
 
@@ -2974,7 +2974,7 @@ div#crm-container form {
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
   border: 0px solid #70716b;
-  background: #484e4c url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png") 50% 50% repeat-x;
+  background: #484e4c url("img/ui-bg_flat_0_aaaaaa_40x100.png") 50% 50% repeat-x;
   font-weight: normal;
   color: #f5f6f1;
 }
@@ -3006,7 +3006,7 @@ div#crm-container form {
 
 /* Date plugin */
 #crm-container input.dateplugin {
-  background: white url(../i/cal.gif) no-repeat scroll right center;
+  background: white url(img/cal.gif) no-repeat scroll right center;
   padding-right: 16px;
   /* so that text doesn't flow on top of icon */
   width: 9em;
@@ -3264,7 +3264,7 @@ div.m ul#civicrm-menu,
 /* autocomplete */
 
 .ac_results {
-  background: transparent url(../i/dropdown-pointer.gif) no-repeat 25px 1px;
+  background: transparent url(img/dropdown-pointer.gif) no-repeat 25px 1px;
   padding-top: 5px;
   border: none;
   text-align: left;
@@ -3316,13 +3316,13 @@ div.m ul#civicrm-menu,
 .crm-container .ac_results li .icon,
 .crm-container .ac_results li a .icon,
 .crm-container .ac_results li a:visited .icon {
-  background-image: url(../i/icons/jquery-ui-FFFFFF.png);
+  background-image: url(img/icons/jquery-ui-FFFFFF.png);
 }
 
 .ac_results li a:hover .icon,
 .ac_results li.ac_over a .icon,
 .crm-container .ac_results li a:hover .icon {
-  background-image: url(../i/icons/jquery-ui-3E3E3E.png);
+  background-image: url(img/icons/jquery-ui-3E3E3E.png);
 }
 
 .ac_results li.ac_over,
@@ -3344,7 +3344,7 @@ div.m ul#civicrm-menu,
 
 #civicrm-menu .ac_loading,
 .crm-container .ac_loading {
-  background: white url('../i/loading.gif') no-repeat right center;
+  background: white url('img/loading.gif') no-repeat right center;
 }
 
 /* theming for panel and context menus */
@@ -3374,7 +3374,7 @@ div.m ul#civicrm-menu,
 
 /*Import progress bar */
 .crm-container .ui-progressbar-value {
-  background-image: url("../packages/jquery/css/images/pbar-ani.gif");
+  background-image: url("img/pbar-ani.gif");
 }
 
 /*Needed for jstree contextmenu */
@@ -3456,7 +3456,7 @@ div.m ul#civicrm-menu,
   cursor: pointer;
   cursor: hand;
   background-position: -66px -114px;
-  background-image: url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-icons_222222_256x240.png");
+  background-image: url("img/ui-icons_222222_256x240.png");
 }
 
 #crm-container span.batch-valid {
@@ -3465,7 +3465,7 @@ div.m ul#civicrm-menu,
   cursor: pointer;
   cursor: hand;
   background-position: -322px -143px;
-  background-image: url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-icons_222222_256x240.png");
+  background-image: url("img/ui-icons_222222_256x240.png");
 }
 
 #crm-container span.batch-invalid {
@@ -3474,7 +3474,7 @@ div.m ul#civicrm-menu,
   cursor: pointer;
   cursor: hand;
   background-position: -258px -143px;
-  background-image: url("../packages/jquery/jquery-ui-1.9.0/css/smoothness/images/ui-icons_222222_256x240.png");
+  background-image: url("img/ui-icons_222222_256x240.png");
 }
 
 #crm-container #Entry ul#errorList {
@@ -3598,7 +3598,7 @@ div.m ul#civicrm-menu,
 }
 
 .crm-container .crm-editable-placeholder {
-  background: url("../i/icons/jquery-ui-2786C2.png") -66px -114px no-repeat;
+  background: url("img/icons/jquery-ui-2786C2.png") -66px -114px no-repeat;
   text-indent: -10000px;
   display: block;
   width: 12px;
@@ -3656,14 +3656,14 @@ div.m ul#civicrm-menu,
 
 #crm-container span.collapsed,
 #crm-container a.collapsed {
-  background: url("../i/TreePlus.gif") no-repeat 0 0;
+  background: url("img/TreePlus.gif") no-repeat 0 0;
   padding-left: 19px;
   cursor: pointer;
 }
 
 #crm-container span.expanded,
 #crm-container a.expanded {
-  background: url("../i/TreeMinus.gif") no-repeat 0 0;
+  background: url("img/TreeMinus.gif") no-repeat 0 0;
   padding-left: 19px;
   cursor: pointer;
 }
@@ -3759,7 +3759,7 @@ div.m ul#civicrm-menu,
 
 .crm-container div.ui-notify-message div.icon,
 .crm-status-icon {
-  background: transparent url("../i/message-icons.png") no-repeat 0 0;
+  background: transparent url("img/message-icons.png") no-repeat 0 0;
   width: 24px;
   height: 24px;
   margin-right: 6px;

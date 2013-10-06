@@ -61,7 +61,7 @@ filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#222222', endC
     padding-top: 30px;
 }
 p.homeintro {
-	font-size: 30px;
+	font-size: 24px;
 	line-height: 1.5em;
 	margin-bottom: 1.5em;
 }
@@ -595,10 +595,47 @@ div#crm-container form .cms_user_help-section.messages.help {
   margin-top: 20px;
 }
 
-#menu-item-1852 {
+#menu-item-1852, #memberprofile-duespage {
   display: none;
+}
+
+.logged-in #memberprofile-duespage, .logged-in #alert-registered {
+  display: block;
 }
 
 .logged-in #menu-item-1852 {
   display: list-item;
+}
+
+.logged-in #paydues-duespage {
+  display: none;
+}
+
+#alert-registered {
+ font-size: 18px;
+}
+
+#alert-registered .btn {
+  margin-left: 20px;
+  margin-top: 7px;
+  margin-bottom: 6px;
+}
+
+.event .crm-container .crm-section .content, .event .crm-container-snippet .crm-section .content {
+  margin-left: 4px;
+  clear: both;
+}
+
+.event .crm-container .crm-section .label, .event .crm-container-snippet .crm-section .label {
+  text-align: left;
+}
+
+.event div#crm-container form .messages.help {
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.event .crm-container fieldset legend {
+  margin-bottom: 0;
+  margin-top: 20px;
 }
